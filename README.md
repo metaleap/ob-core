@@ -1,4 +1,4 @@
 core
 ====
 
-TBA
+OpenBase Core libraries
