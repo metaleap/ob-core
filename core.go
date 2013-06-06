@@ -2,32 +2,51 @@ package core
 
 import (
 	"fmt"
-	"os"
+	"log"
 	"path/filepath"
+)
 
-	uio "github.com/metaleap/go-util/io"
+const (
+	OB_TITLE = "OpenBase"
 )
 
 var (
-	DirPath string
+	Hive      ObHive
+	Server    ObServer
+	Sandboxed bool
 )
 
-func isObDir(dirPath string) bool {
-	return uio.DirsFilesExist(dirPath, "client")
+func Dispose() {
+	if Hive.Watch != nil {
+		Hive.Watch.Close()
+		Hive.Watch = nil
+	}
 }
 
-func GuessDirPath(userSpecified string) (guess string) {
-	if guess = userSpecified; !isObDir(guess) {
-		if guess = os.Getenv("OBPATH"); !isObDir(guess) {
-			guess = "."
+func Init(hiveDirPath string) (err error) {
+	log.Printf("[INIT]\t@ hive = '%s', sandboxed = %v", hiveDirPath, Sandboxed)
+	if !Sandboxed {
+		if hiveDirPath, err = filepath.Abs(hiveDirPath); (err == nil) && !Hive.IsHive(hiveDirPath) {
+			err = fmt.Errorf("Not a valid %s Hive directory installation: '%s'.", OB_TITLE, hiveDirPath)
+		}
+	}
+	if err == nil {
+		Hive.DirPath = hiveDirPath
+		if err = Hive.init(); err == nil {
+			Server.init()
 		}
 	}
 	return
 }
 
-func Init(dirPath string) (err error) {
-	if DirPath, err = filepath.Abs(dirPath); (err == nil) && !isObDir(DirPath) {
-		err = fmt.Errorf("The specified directory '%s' does not contain a valid OpenBase installation.", DirPath)
+func ListenAndServe(addr, tlsCertFile, tlsKeyFile string) (err error) {
+	if Sandboxed {
+		err = fmt.Errorf("Cannot call ListenAndServe() in Sandboxed mode")
+		return
 	}
-	return
+	Server.Http.Addr = addr
+	if len(tlsCertFile) > 0 && len(tlsKeyFile) > 0 {
+		return Server.Http.ListenAndServeTLS(tlsCertFile, tlsKeyFile)
+	}
+	return Server.Http.ListenAndServe()
 }
