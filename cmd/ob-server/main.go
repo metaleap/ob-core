@@ -9,6 +9,7 @@ import (
 	ustr "github.com/metaleap/go-util/str"
 
 	ob "github.com/openbase/ob-core"
+	obsrv "github.com/openbase/ob-core/server"
 )
 
 func main() {
@@ -33,5 +34,5 @@ func main() {
 		host = "localhost"
 	}
 	log.Printf("[LIVE]\t@ %s://%s%s", proto, host, ustr.StripSuffix(*addr, ":"+proto))
-	log.Fatal(ob.ListenAndServe(*addr, *tlsCertFile, *tlsKeyFile))
+	log.Fatal(obsrv.ListenAndServe(*addr, *tlsCertFile, *tlsKeyFile))
 }

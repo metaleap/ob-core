@@ -1,4 +1,4 @@
-package core
+package obcore
 
 import (
 	"fmt"
@@ -12,7 +12,6 @@ const (
 
 var (
 	Hive      ObHive
-	Server    ObServer
 	Sandboxed bool
 )
 
@@ -32,21 +31,7 @@ func Init(hiveDirPath string) (err error) {
 	}
 	if err == nil {
 		Hive.DirPath = hiveDirPath
-		if err = Hive.init(); err == nil {
-			Server.init()
-		}
+		err = Hive.init()
 	}
 	return
-}
-
-func ListenAndServe(addr, tlsCertFile, tlsKeyFile string) (err error) {
-	if Sandboxed {
-		err = fmt.Errorf("Cannot call ListenAndServe() in Sandboxed mode")
-		return
-	}
-	Server.Http.Addr = addr
-	if len(tlsCertFile) > 0 && len(tlsKeyFile) > 0 {
-		return Server.Http.ListenAndServeTLS(tlsCertFile, tlsKeyFile)
-	}
-	return Server.Http.ListenAndServe()
 }
