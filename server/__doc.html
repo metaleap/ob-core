@@ -68,8 +68,32 @@ Web server functionality, used by the cmd/ob-server main package
 			
 			
 				
+				<dd><a href="#Init">func Init()</a></dd>
+			
+				
 				<dd><a href="#ListenAndServe">func ListenAndServe(addr, tlsCertFile, tlsKeyFile string) (err error)</a></dd>
 			
+			
+				
+				<dd><a href="#RequestContext">type RequestContext</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewRequestContext">func NewRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext)</a></dd>
+				
+				
+			
+				
+				<dd><a href="#RequestContextEventHandler">type RequestContextEventHandler</a></dd>
+				
+				
+			
+				
+				<dd><a href="#RequestContextEventHandlers">type RequestContextEventHandlers</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#RequestContextEventHandlers.Add">func (me *RequestContextEventHandlers) Add(eventHandlers ...RequestContextEventHandler)</a></dd>
+				
 			
 			
 			</dl>
@@ -83,6 +107,8 @@ Web server functionality, used by the cmd/ob-server main package
 			<span style="font-size:90%">
 			
 				<a href="/target/doc.go">doc.go</a>
+			
+				<a href="/target/request-context.go">request-context.go</a>
 			
 				<a href="/target/server.go">server.go</a>
 			
@@ -105,6 +131,18 @@ Web server functionality, used by the cmd/ob-server main package
 
     <span class="comment">//	Request-routing multiplexer</span>
     <span id="Mux">Mux</span> *<a href="/pkg/github.com/gorilla/mux/">mux</a>.<a href="/pkg/github.com/gorilla/mux/#Router">Router</a>
+
+    <span class="comment">//	Custom event handlers</span>
+    <span id="On">On</span> struct {
+        <span class="comment">//	Request-related event handlers</span>
+        Request struct {
+            <span class="comment">//	Event handlers to be invoked before serving a web request (except _static files)</span>
+            Serving <a href="#RequestContextEventHandlers">RequestContextEventHandlers</a>
+
+            <span class="comment">//	Event handlers to be invoked immediately after serving a web request (except _static files)</span>
+            Served <a href="#RequestContextEventHandlers">RequestContextEventHandlers</a>
+        }
+    }
 )</pre>
 				
 			
@@ -112,7 +150,17 @@ Web server functionality, used by the cmd/ob-server main package
 		
 			
 			
-			<h2 id="ListenAndServe">func <a href="/target/server.go?s=654:723#L24">ListenAndServe</a></h2>
+			<h2 id="Init">func <a href="/target/server.go?s=743:754#L26">Init</a></h2>
+			<pre>func Init()</pre>
+			<p>
+Initializes the package for serving web requests
+</p>
+
+			
+		
+			
+			
+			<h2 id="ListenAndServe">func <a href="/target/server.go?s=1163:1232#L37">ListenAndServe</a></h2>
 			<pre>func ListenAndServe(addr, tlsCertFile, tlsKeyFile <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Starts listening to and serving web requests.
@@ -121,6 +169,95 @@ Uses Transport Layer Security only if both tls arguments are specified.
 
 			
 		
+		
+			
+			
+			<h2 id="RequestContext">type <a href="/target/request-context.go?s=772:1134#L22">RequestContext</a></h2>
+			<pre>type RequestContext struct {
+    <span class="comment">//	The http.ResponseWriter for this RequestContext</span>
+    Out <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#ResponseWriter">ResponseWriter</a>
+
+    <span class="comment">//	The http.Request for this RequestContext</span>
+    Req *<a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Request">Request</a>
+
+    <span class="comment">//	Defaults to Opt.Log</span>
+    Log <a href="/pkg/github.com/openbase/ob-core/">ob</a>.<a href="/pkg/github.com/openbase/ob-core/#Logger">Logger</a>
+
+    <span class="comment">//	Not used in stand-alone mode.</span>
+    <span class="comment">//	May be used in sandboxed mode (eg. the GAE package uses it for the current appengine.Context)</span>
+    Ctx interface{}
+}</pre>
+			<p>
+Encapsulates and provides context for a (non _static) web request
+</p>
+
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="NewRequestContext">func <a href="/target/request-context.go?s=1228:1332#L38">NewRequestContext</a></h3>
+				<pre>func NewRequestContext(httpResponse <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#ResponseWriter">ResponseWriter</a>, httpRequest *<a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Request">Request</a>) (me *<a href="#RequestContext">RequestContext</a>)</pre>
+				<p>
+Creates and returns a new *RequestContext for the specified httpRequest and httpResponse
+</p>
+
+				
+			
+
+			
+		
+			
+			
+			<h2 id="RequestContextEventHandler">type <a href="/target/request-context.go?s=351:404#L11">RequestContextEventHandler</a></h2>
+			<pre>type RequestContextEventHandler func(*<a href="#RequestContext">RequestContext</a>)</pre>
+			<p>
+A function that accepts a *RequestContext
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="RequestContextEventHandlers">type <a href="/target/request-context.go?s=468:529#L14">RequestContextEventHandlers</a></h2>
+			<pre>type RequestContextEventHandlers []<a href="#RequestContextEventHandler">RequestContextEventHandler</a></pre>
+			<p>
+A collection of RequestContextEventHandler function-values
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="RequestContextEventHandlers.Add">func (*RequestContextEventHandlers) <a href="/target/request-context.go?s=573:660#L17">Add</a></h3>
+				<pre>func (me *<a href="#RequestContextEventHandlers">RequestContextEventHandlers</a>) Add(eventHandlers ...<a href="#RequestContextEventHandler">RequestContextEventHandler</a>)</pre>
+				<p>
+Adds the specified eventHandlers to me
+</p>
+
+				
+				
+			
 		
 	
 

@@ -73,12 +73,20 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				<dd><a href="#Dispose">func Dispose()</a></dd>
 			
 				
-				<dd><a href="#Init">func Init(hiveDirPath string, logWriter io.Writer) (err error)</a></dd>
+				<dd><a href="#Init">func Init(hiveDirPath string, logger Logger) (err error)</a></dd>
 			
+			
+				
+				<dd><a href="#Logger">type Logger</a></dd>
+				
+				
 			
 				
 				<dd><a href="#ObHive">type ObHive</a></dd>
 				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObHive.CreateLogFile">func (_ ObHive) CreateLogFile() (fullPath string, newOutFile *os.File, err error)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#ObHive.GuessDirPath">func (_ ObHive) GuessDirPath(userSpecified string) (guess string)</a></dd>
@@ -88,6 +96,32 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#ObHive.Path">func (_ ObHive) Path(segments ...string) (fullFsPath string)</a></dd>
+				
+			
+				
+				<dd><a href="#ObLogger">type ObLogger</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewLogger">func NewLogger(out io.Writer) (me *ObLogger)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObLogger.Criticalf">func (me *ObLogger) Criticalf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObLogger.Debugf">func (me *ObLogger) Debugf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObLogger.Errorf">func (me *ObLogger) Errorf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObLogger.Fatal">func (me *ObLogger) Fatal(err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObLogger.Infof">func (me *ObLogger) Infof(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObLogger.Warningf">func (me *ObLogger) Warningf(format string, args ...interface{})</a></dd>
 				
 			
 			
@@ -104,6 +138,8 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				<a href="/target/core.go">core.go</a>
 			
 				<a href="/target/doc.go">doc.go</a>
+			
+				<a href="/target/ob-diag.go">ob-diag.go</a>
 			
 				<a href="/target/ob-hive.go">ob-hive.go</a>
 			
@@ -134,7 +170,7 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 		
 			
 			
-			<h2 id="Dispose">func <a href="/target/core.go?s=1203:1217#L31">Dispose</a></h2>
+			<h2 id="Dispose">func <a href="/target/core.go?s=1269:1283#L34">Dispose</a></h2>
 			<pre>func Dispose()</pre>
 			<p>
 Clean-up. Call this when you&#39;re done working with this package and all allocated resources should be released.
@@ -144,18 +180,56 @@ Clean-up. Call this when you&#39;re done working with this package and all alloc
 		
 			
 			
-			<h2 id="Init">func <a href="/target/core.go?s=1684:1746#L43">Init</a></h2>
-			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>, logWriter <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+			<h2 id="Init">func <a href="/target/core.go?s=1741:1797#L46">Init</a></h2>
+			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>, logger <a href="#Logger">Logger</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Initialization. Call this before working with this package.
 Before calling Init(), you may need to set Opt.Sandboxed, see Opt for details.
-If logWriter is nil, logging is disabled and Opt.Log uses a uio.DiscardWriter.
-In any event, Opt.Log doesn&#39;t log the err being returned, so be sure to check it.
+If logger is nil, Log is set to a no-op dummy and logging is disabled.
+In any event, Init() doesn&#39;t log the err being returned, so be sure to check it.
 If err is not nil, this package is not in a usable state and must not be used.
 </p>
 
 			
 		
+		
+			
+			
+			<h2 id="Logger">type <a href="/target/ob-diag.go?s=120:765#L1">Logger</a></h2>
+			<pre>type Logger interface {
+    <span class="comment">// Debugf formats its arguments according to the format, analogous to fmt.Printf,</span>
+    <span class="comment">// and records the text as a log message at Debug level</span>
+    Debugf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})
+
+    <span class="comment">// Infof is like Debugf, but at Info level</span>
+    Infof(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})
+
+    <span class="comment">// Warningf is like Debugf, but at Warning level</span>
+    Warningf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})
+
+    <span class="comment">// Errorf is like Debugf, but at Error level</span>
+    Errorf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})
+
+    <span class="comment">// Criticalf is like Debugf, but at Critical level</span>
+    Criticalf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})
+
+    <span class="comment">//	Fatal is like Criticalf, then panics</span>
+    Fatal(err <a href="/pkg/builtin/#error">error</a>)
+}</pre>
+			<p>
+An interface for log output. ObLogger provides the canonical implementation
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
 		
 			
 			
@@ -184,8 +258,8 @@ Singleton type. Only valid use is the exported Hive variable.
 
     <span class="comment">//	Runtime options</span>
     <span id="Opt">Opt</span> struct {
-        <span class="comment">//	Created in Init() and never nil, even if logging is disabled.</span>
-        Log *<a href="/pkg/log/">log</a>.<a href="/pkg/log/#Logger">Logger</a>
+        <span class="comment">//	Set via Init(), must not be nil even if logging is disabled</span>
+        Log <a href="#Logger">Logger</a>
 
         <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
         <span class="comment">//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)</span>
@@ -196,6 +270,7 @@ Singleton type. Only valid use is the exported Hive variable.
         <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
         <span class="comment">//	are unneeded when importing this package in a &#34;server-side, server-less client&#34; scenario.)</span>
         Server <a href="/pkg/builtin/#bool">bool</a>
+        <span class="comment">// contains filtered or unexported fields</span>
     }
 )</pre>
 				
@@ -207,7 +282,17 @@ Singleton type. Only valid use is the exported Hive variable.
 
 			
 				
-				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=897:962#L27">GuessDirPath</a></h3>
+				<h3 id="ObHive.CreateLogFile">func (ObHive) <a href="/target/ob-hive.go?s=782:863#L26">CreateLogFile</a></h3>
+				<pre>func (_ <a href="#ObHive">ObHive</a>) CreateLogFile() (fullPath <a href="/pkg/builtin/#string">string</a>, newOutFile *<a href="/pkg/os/">os</a>.<a href="/pkg/os/#File">File</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Creates a new log file at: [Hive.DirPath]/log/[date-time].log
+</p>
+
+				
+				
+			
+				
+				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=1287:1352#L37">GuessDirPath</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) GuessDirPath(userSpecified <a href="/pkg/builtin/#string">string</a>) (guess <a href="/pkg/builtin/#string">string</a>)</pre>
 				<p>
 Returns userSpecified if that is a valid Hive-directory path as per ObHive.IsHive(),
@@ -218,7 +303,7 @@ else returns the value of the OBHIVE environment variable (regardless of path va
 				
 			
 				
-				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1132:1175#L35">IsHive</a></h3>
+				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1522:1565#L45">IsHive</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) IsHive(dirPath <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Returns true if the specified path points to a valid Hive-directory.
@@ -228,11 +313,103 @@ Returns true if the specified path points to a valid Hive-directory.
 				
 			
 				
-				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=1415:1475#L41">Path</a></h3>
+				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=1805:1865#L51">Path</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) Path(segments ...<a href="/pkg/builtin/#string">string</a>) (fullFsPath <a href="/pkg/builtin/#string">string</a>)</pre>
 				<p>
 Returns a cleaned Hive-relative path for the specified path segments.
 For example, if Hive.DirPath is &#34;obtest/test2&#34;, then Hive.Path(&#34;pkg&#34;, &#34;mysql&#34;) returns &#34;obtest/test2/pkg/mysql&#34;
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="ObLogger">type <a href="/target/ob-diag.go?s=823:911#L21">ObLogger</a></h2>
+			<pre>type ObLogger struct {
+    <span class="comment">//	Unless nil, all logging methods write to Out</span>
+    Out <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>
+}</pre>
+			<p>
+The canonical implementation of the Logger interface
+</p>
+
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="NewLogger">func <a href="/target/ob-diag.go?s=984:1028#L27">NewLogger</a></h3>
+				<pre>func NewLogger(out <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>) (me *<a href="#ObLogger">ObLogger</a>)</pre>
+				<p>
+Creates and returns a new ObLogger with the specified Out io.Writer
+</p>
+
+				
+			
+
+			
+				
+				<h3 id="ObLogger.Criticalf">func (*ObLogger) <a href="/target/ob-diag.go?s=1989:2054#L62">Criticalf</a></h3>
+				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Criticalf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
+				<p>
+Criticalf is like Debugf, but at Critical level
+</p>
+
+				
+				
+			
+				
+				<h3 id="ObLogger.Debugf">func (*ObLogger) <a href="/target/ob-diag.go?s=1206:1268#L34">Debugf</a></h3>
+				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Debugf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
+				<p>
+Debugf formats its arguments according to the format, analogous to fmt.Printf,
+and records the text as a log message at Debug level
+</p>
+
+				
+				
+			
+				
+				<h3 id="ObLogger.Errorf">func (*ObLogger) <a href="/target/ob-diag.go?s=1789:1851#L55">Errorf</a></h3>
+				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Errorf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
+				<p>
+Errorf is like Debugf, but at Error level
+</p>
+
+				
+				
+			
+				
+				<h3 id="ObLogger.Fatal">func (*ObLogger) <a href="/target/ob-diag.go?s=2182:2218#L69">Fatal</a></h3>
+				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Fatal(err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Fatal is like Criticalf, then panics
+</p>
+
+				
+				
+			
+				
+				<h3 id="ObLogger.Infof">func (*ObLogger) <a href="/target/ob-diag.go?s=1398:1459#L41">Infof</a></h3>
+				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Infof(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
+				<p>
+Infof is like Debugf, but at Info level
+</p>
+
+				
+				
+			
+				
+				<h3 id="ObLogger.Warningf">func (*ObLogger) <a href="/target/ob-diag.go?s=1594:1658#L48">Warningf</a></h3>
+				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Warningf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
+				<p>
+Warningf is like Debugf, but at Warning level
 </p>
 
 				

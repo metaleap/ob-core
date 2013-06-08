@@ -32,6 +32,16 @@ func (_ ObHive) init() (err error) {
 	return
 }
 
+//	Creates a new log file at: [Hive.DirPath]/log/[date-time].log
+func (_ ObHive) CreateLogFile() (fullPath string, newOutFile *os.File, err error) {
+	logDirPath := Hive.Path("log")
+	if err = uio.EnsureDirExists(logDirPath); err == nil {
+		fullPath = filepath.Join(logDirPath, strf("%s.log", Opt.initTime.Format("2006-01-02_15-04-05")))
+		newOutFile, err = os.Create(fullPath)
+	}
+	return
+}
+
 //	Returns userSpecified if that is a valid Hive-directory path as per ObHive.IsHive(),
 //	else returns the value of the OBHIVE environment variable (regardless of path validity).
 func (_ ObHive) GuessDirPath(userSpecified string) (guess string) {

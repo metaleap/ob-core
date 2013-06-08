@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+
+	ob "github.com/openbase/ob-core"
 )
 
 var (
@@ -16,17 +18,28 @@ var (
 
 	//	Request-routing multiplexer
 	Mux *mux.Router
+
+	//	Custom event handlers
+	On struct {
+		//	Request-related event handlers
+		Request struct {
+			//	Event handlers to be invoked before serving a web request (except _static files)
+			Serving RequestContextEventHandlers
+
+			//	Event handlers to be invoked immediately after serving a web request (except _static files)
+			Served RequestContextEventHandlers
+		}
+	}
 )
 
-func init() {
+//	Initializes the package for serving web requests
+func Init() {
+	StaticFiles = http.FileServer(http.Dir(ob.Hive.Path("client", "pub")))
 	Mux = mux.NewRouter()
-	Mux.PathPrefix("/").HandlerFunc(serveDefault)
+	Mux.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", StaticFiles))
+	Mux.PathPrefix("/").HandlerFunc(serveRequest)
 	Http.Handler = Mux
 	Http.ReadTimeout = 2 * time.Minute
-}
-
-func serveDefault(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello World!"))
 }
 
 //	Starts listening to and serving web requests.
