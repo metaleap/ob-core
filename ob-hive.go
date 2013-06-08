@@ -13,6 +13,13 @@ const (
 	ENV_OBHIVE = "OBHIVE"
 )
 
+var (
+	//	Provides access to the 'Hive-directory', the root directory
+	//	containing configuration files, static web-served files, "template schema"
+	//	files, package manifests and possibly data-base files depending on setup.
+	Hive ObHive
+)
+
 //	Singleton type. Only valid use is the exported Hive variable.
 type ObHive struct {
 	//	The current Hive-directory path

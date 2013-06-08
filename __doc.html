@@ -68,6 +68,8 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				<dd><a href="#pkg-constants">Constants</a></dd>
 			
 			
+				<dd><a href="#pkg-variables">Variables</a></dd>
+			
 			
 				
 				<dd><a href="#Dispose">func Dispose()</a></dd>
@@ -167,10 +169,33 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 			
 		
 		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				<pre>var (
+    <span class="comment">//	Runtime options</span>
+    <span id="Opt">Opt</span> struct {
+        <span class="comment">//	Set via Init(), must not be nil even if logging is disabled</span>
+        Log <a href="#Logger">Logger</a>
+
+        <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
+        <span class="comment">//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)</span>
+        Sandboxed <a href="/pkg/builtin/#bool">bool</a>
+
+        <span class="comment">//	Set to true before Init() in cmd/ob-server/main.go.</span>
+        <span class="comment">//	Should remain false in practically all other scenarios.</span>
+        <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
+        <span class="comment">//	are unneeded when importing this package in a &#34;server-side, server-less client&#34; scenario.)</span>
+        Server <a href="/pkg/builtin/#bool">bool</a>
+        <span class="comment">// contains filtered or unexported fields</span>
+    }
+)</pre>
+				
+			
+		
 		
 			
 			
-			<h2 id="Dispose">func <a href="/target/core.go?s=1269:1283#L34">Dispose</a></h2>
+			<h2 id="Dispose">func <a href="/target/core.go?s=1034:1048#L29">Dispose</a></h2>
 			<pre>func Dispose()</pre>
 			<p>
 Clean-up. Call this when you&#39;re done working with this package and all allocated resources should be released.
@@ -180,7 +205,7 @@ Clean-up. Call this when you&#39;re done working with this package and all alloc
 		
 			
 			
-			<h2 id="Init">func <a href="/target/core.go?s=1741:1797#L46">Init</a></h2>
+			<h2 id="Init">func <a href="/target/core.go?s=1506:1562#L41">Init</a></h2>
 			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>, logger <a href="#Logger">Logger</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Initialization. Call this before working with this package.
@@ -233,7 +258,7 @@ An interface for log output. ObLogger provides the canonical implementation
 		
 			
 			
-			<h2 id="ObHive">type <a href="/target/ob-hive.go?s=321:542#L7">ObHive</a></h2>
+			<h2 id="ObHive">type <a href="/target/ob-hive.go?s=564:785#L14">ObHive</a></h2>
 			<pre>type ObHive struct {
     <span class="comment">//	The current Hive-directory path</span>
     DirPath <a href="/pkg/builtin/#string">string</a>
@@ -255,23 +280,6 @@ Singleton type. Only valid use is the exported Hive variable.
     <span class="comment">//	containing configuration files, static web-served files, &#34;template schema&#34;</span>
     <span class="comment">//	files, package manifests and possibly data-base files depending on setup.</span>
     <span id="Hive">Hive</span> <a href="#ObHive">ObHive</a>
-
-    <span class="comment">//	Runtime options</span>
-    <span id="Opt">Opt</span> struct {
-        <span class="comment">//	Set via Init(), must not be nil even if logging is disabled</span>
-        Log <a href="#Logger">Logger</a>
-
-        <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
-        <span class="comment">//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)</span>
-        Sandboxed <a href="/pkg/builtin/#bool">bool</a>
-
-        <span class="comment">//	Set to true before Init() in cmd/ob-server/main.go.</span>
-        <span class="comment">//	Should remain false in practically all other scenarios.</span>
-        <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
-        <span class="comment">//	are unneeded when importing this package in a &#34;server-side, server-less client&#34; scenario.)</span>
-        Server <a href="/pkg/builtin/#bool">bool</a>
-        <span class="comment">// contains filtered or unexported fields</span>
-    }
 )</pre>
 				
 			
@@ -282,7 +290,7 @@ Singleton type. Only valid use is the exported Hive variable.
 
 			
 				
-				<h3 id="ObHive.CreateLogFile">func (ObHive) <a href="/target/ob-hive.go?s=782:863#L26">CreateLogFile</a></h3>
+				<h3 id="ObHive.CreateLogFile">func (ObHive) <a href="/target/ob-hive.go?s=1025:1106#L33">CreateLogFile</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) CreateLogFile() (fullPath <a href="/pkg/builtin/#string">string</a>, newOutFile *<a href="/pkg/os/">os</a>.<a href="/pkg/os/#File">File</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Creates a new log file at: [Hive.DirPath]/log/[date-time].log
@@ -292,7 +300,7 @@ Creates a new log file at: [Hive.DirPath]/log/[date-time].log
 				
 			
 				
-				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=1287:1352#L37">GuessDirPath</a></h3>
+				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=1530:1595#L44">GuessDirPath</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) GuessDirPath(userSpecified <a href="/pkg/builtin/#string">string</a>) (guess <a href="/pkg/builtin/#string">string</a>)</pre>
 				<p>
 Returns userSpecified if that is a valid Hive-directory path as per ObHive.IsHive(),
@@ -303,7 +311,7 @@ else returns the value of the OBHIVE environment variable (regardless of path va
 				
 			
 				
-				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1522:1565#L45">IsHive</a></h3>
+				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1765:1808#L52">IsHive</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) IsHive(dirPath <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Returns true if the specified path points to a valid Hive-directory.
@@ -313,7 +321,7 @@ Returns true if the specified path points to a valid Hive-directory.
 				
 			
 				
-				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=1805:1865#L51">Path</a></h3>
+				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=2048:2108#L58">Path</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) Path(segments ...<a href="/pkg/builtin/#string">string</a>) (fullFsPath <a href="/pkg/builtin/#string">string</a>)</pre>
 				<p>
 Returns a cleaned Hive-relative path for the specified path segments.

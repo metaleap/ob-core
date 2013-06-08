@@ -12,11 +12,6 @@ const (
 )
 
 var (
-	//	Provides access to the 'Hive-directory', the root directory
-	//	containing configuration files, static web-served files, "template schema"
-	//	files, package manifests and possibly data-base files depending on setup.
-	Hive ObHive
-
 	//	Runtime options
 	Opt struct {
 		//	Set via Init(), must not be nil even if logging is disabled
