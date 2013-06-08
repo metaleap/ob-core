@@ -45,7 +45,7 @@
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
 				<p>
-OpenBase web server functionality
+Web server functionality, used by the cmd/ob-server main package
 </p>
 
 			</div>
@@ -97,9 +97,14 @@ OpenBase web server functionality
 			<h2 id="pkg-variables">Variables</h2>
 			
 				<pre>var (
-    <span id="Http">Http</span>        <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Server">Server</a>
+    <span class="comment">//	The http.Server used to serve web requests</span>
+    <span id="Http">Http</span> <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Server">Server</a>
+
+    <span class="comment">//	The http.Handler that maps to the [hive]/client/pub directory</span>
     <span id="StaticFiles">StaticFiles</span> <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Handler">Handler</a>
-    <span id="Mux">Mux</span>         *<a href="/pkg/github.com/gorilla/mux/">mux</a>.<a href="/pkg/github.com/gorilla/mux/#Router">Router</a>
+
+    <span class="comment">//	Request-routing multiplexer</span>
+    <span id="Mux">Mux</span> *<a href="/pkg/github.com/gorilla/mux/">mux</a>.<a href="/pkg/github.com/gorilla/mux/#Router">Router</a>
 )</pre>
 				
 			
@@ -107,9 +112,13 @@ OpenBase web server functionality
 		
 			
 			
-			<h2 id="ListenAndServe">func <a href="/target/server.go?s=399:468#L17">ListenAndServe</a></h2>
+			<h2 id="ListenAndServe">func <a href="/target/server.go?s=654:723#L24">ListenAndServe</a></h2>
 			<pre>func ListenAndServe(addr, tlsCertFile, tlsKeyFile <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
-			
+			<p>
+Starts listening to and serving web requests.
+Uses Transport Layer Security only if both tls arguments are specified.
+</p>
+
 			
 		
 		

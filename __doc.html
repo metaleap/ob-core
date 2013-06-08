@@ -47,7 +47,7 @@
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
 				<p>
-OpenBase core (&#39;kernel&#39;-level, but server-less) functionality package
+Core (&#39;kernel&#39;-level, but server-less) functionality package
 </p>
 
 			</div>
@@ -68,14 +68,12 @@ OpenBase core (&#39;kernel&#39;-level, but server-less) functionality package
 				<dd><a href="#pkg-constants">Constants</a></dd>
 			
 			
-				<dd><a href="#pkg-variables">Variables</a></dd>
-			
 			
 				
 				<dd><a href="#Dispose">func Dispose()</a></dd>
 			
 				
-				<dd><a href="#Init">func Init(hiveDirPath string) (err error)</a></dd>
+				<dd><a href="#Init">func Init(hiveDirPath string, logWriter io.Writer) (err error)</a></dd>
 			
 			
 				
@@ -89,7 +87,7 @@ OpenBase core (&#39;kernel&#39;-level, but server-less) functionality package
 					<dd>&nbsp; &nbsp; <a href="#ObHive.IsHive">func (_ ObHive) IsHive(dirPath string) bool</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#ObHive.Path">func (_ ObHive) Path(names ...string) (fullFsPath string)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#ObHive.Path">func (_ ObHive) Path(segments ...string) (fullFsPath string)</a></dd>
 				
 			
 			
@@ -119,54 +117,89 @@ OpenBase core (&#39;kernel&#39;-level, but server-less) functionality package
 			<h2 id="pkg-constants">Constants</h2>
 			
 				<pre>const (
+    <span class="comment">//	The name of the environment variable storing the Hive-directory path, if set.</span>
+    <span class="comment">//	Used as a fall-back by ObHive.GuessDirPath().</span>
     <span id="ENV_OBHIVE">ENV_OBHIVE</span> = &#34;OBHIVE&#34;
 )</pre>
 				
 			
 				<pre>const (
+    <span class="comment">//	Framework/platform title. Who knows, it might change..</span>
     <span id="OB_TITLE">OB_TITLE</span> = &#34;OpenBase&#34;
 )</pre>
 				
 			
 		
 		
-			<h2 id="pkg-variables">Variables</h2>
+		
+			
+			
+			<h2 id="Dispose">func <a href="/target/core.go?s=1203:1217#L31">Dispose</a></h2>
+			<pre>func Dispose()</pre>
+			<p>
+Clean-up. Call this when you&#39;re done working with this package and all allocated resources should be released.
+</p>
+
+			
+		
+			
+			
+			<h2 id="Init">func <a href="/target/core.go?s=1684:1746#L43">Init</a></h2>
+			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>, logWriter <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Initialization. Call this before working with this package.
+Before calling Init(), you may need to set Opt.Sandboxed, see Opt for details.
+If logWriter is nil, logging is disabled and Opt.Log uses a uio.DiscardWriter.
+In any event, Opt.Log doesn&#39;t log the err being returned, so be sure to check it.
+If err is not nil, this package is not in a usable state and must not be used.
+</p>
+
+			
+		
+		
+			
+			
+			<h2 id="ObHive">type <a href="/target/ob-hive.go?s=321:542#L7">ObHive</a></h2>
+			<pre>type ObHive struct {
+    <span class="comment">//	The current Hive-directory path</span>
+    DirPath <a href="/pkg/builtin/#string">string</a>
+
+    <span class="comment">//	The uio.Watcher used for any and all Hive-directory change-event notifications.</span>
+    <span class="comment">//	This is nil if Opt.Sandboxed is true.</span>
+    Watch *<a href="/pkg/github.com/metaleap/go-util/io/">uio</a>.<a href="/pkg/github.com/metaleap/go-util/io/#Watcher">Watcher</a>
+}</pre>
+			<p>
+Singleton type. Only valid use is the exported Hive variable.
+</p>
+
+
+			
+
 			
 				<pre>var (
-    <span id="Hive">Hive</span>      <a href="#ObHive">ObHive</a>
-    <span id="Sandboxed">Sandboxed</span> <a href="/pkg/builtin/#bool">bool</a>
+    <span class="comment">//	Provides access to the &#39;Hive-directory&#39;, the root directory</span>
+    <span class="comment">//	containing configuration files, static web-served files, &#34;template schema&#34;</span>
+    <span class="comment">//	files, package manifests and possibly data-base files depending on setup.</span>
+    <span id="Hive">Hive</span> <a href="#ObHive">ObHive</a>
+
+    <span class="comment">//	Runtime options</span>
+    <span id="Opt">Opt</span> struct {
+        <span class="comment">//	Created in Init() and never nil, even if logging is disabled.</span>
+        Log *<a href="/pkg/log/">log</a>.<a href="/pkg/log/#Logger">Logger</a>
+
+        <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
+        <span class="comment">//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)</span>
+        Sandboxed <a href="/pkg/builtin/#bool">bool</a>
+
+        <span class="comment">//	Set to true before Init() in cmd/ob-server/main.go.</span>
+        <span class="comment">//	Should remain false in practically all other scenarios.</span>
+        <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
+        <span class="comment">//	are unneeded when importing this package in a &#34;server-side, server-less client&#34; scenario.)</span>
+        Server <a href="/pkg/builtin/#bool">bool</a>
+    }
 )</pre>
 				
 			
-		
-		
-			
-			
-			<h2 id="Dispose">func <a href="/target/core.go?s=136:150#L8">Dispose</a></h2>
-			<pre>func Dispose()</pre>
-			
-			
-		
-			
-			
-			<h2 id="Init">func <a href="/target/core.go?s=223:264#L15">Init</a></h2>
-			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
-			
-			
-		
-		
-			
-			
-			<h2 id="ObHive">type <a href="/target/ob-hive.go?s=124:184#L4">ObHive</a></h2>
-			<pre>type ObHive struct {
-    DirPath <a href="/pkg/builtin/#string">string</a>
-    Watch   *<a href="/pkg/github.com/metaleap/go-util/io/">uio</a>.<a href="/pkg/github.com/metaleap/go-util/io/#Watcher">Watcher</a>
-}</pre>
-			
-
-			
-
-			
 
 			
 
@@ -174,23 +207,34 @@ OpenBase core (&#39;kernel&#39;-level, but server-less) functionality package
 
 			
 				
-				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=355:420#L18">GuessDirPath</a></h3>
+				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=897:962#L27">GuessDirPath</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) GuessDirPath(userSpecified <a href="/pkg/builtin/#string">string</a>) (guess <a href="/pkg/builtin/#string">string</a>)</pre>
-				
+				<p>
+Returns userSpecified if that is a valid Hive-directory path as per ObHive.IsHive(),
+else returns the value of the OBHIVE environment variable (regardless of path validity).
+</p>
+
 				
 				
 			
 				
-				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=518:561#L25">IsHive</a></h3>
+				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1132:1175#L35">IsHive</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) IsHive(dirPath <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
-				
+				<p>
+Returns true if the specified path points to a valid Hive-directory.
+</p>
+
 				
 				
 			
 				
-				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=613:670#L29">Path</a></h3>
-				<pre>func (_ <a href="#ObHive">ObHive</a>) Path(names ...<a href="/pkg/builtin/#string">string</a>) (fullFsPath <a href="/pkg/builtin/#string">string</a>)</pre>
-				
+				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=1415:1475#L41">Path</a></h3>
+				<pre>func (_ <a href="#ObHive">ObHive</a>) Path(segments ...<a href="/pkg/builtin/#string">string</a>) (fullFsPath <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+Returns a cleaned Hive-relative path for the specified path segments.
+For example, if Hive.DirPath is &#34;obtest/test2&#34;, then Hive.Path(&#34;pkg&#34;, &#34;mysql&#34;) returns &#34;obtest/test2/pkg/mysql&#34;
+</p>
+
 				
 				
 			
