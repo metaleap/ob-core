@@ -174,7 +174,7 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				<pre>var (
     <span class="comment">//	Runtime options</span>
     <span id="Opt">Opt</span> struct {
-        <span class="comment">//	Set via Init(), must not be nil even if logging is disabled</span>
+        <span class="comment">//	Set via Init(), never nil (even if logging is disabled)</span>
         Log <a href="#Logger">Logger</a>
 
         <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
@@ -184,7 +184,7 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
         <span class="comment">//	Set to true before Init() in cmd/ob-server/main.go.</span>
         <span class="comment">//	Should remain false in practically all other scenarios.</span>
         <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
-        <span class="comment">//	are unneeded when importing this package in a &#34;server-side, server-less client&#34; scenario.)</span>
+        <span class="comment">//	are unneeded when importing this package in a &#34;server-side but server-less client&#34; scenario.)</span>
         Server <a href="/pkg/builtin/#bool">bool</a>
         <span class="comment">// contains filtered or unexported fields</span>
     }
@@ -195,7 +195,7 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 		
 			
 			
-			<h2 id="Dispose">func <a href="/target/core.go?s=1034:1048#L29">Dispose</a></h2>
+			<h2 id="Dispose">func <a href="/target/core.go?s=1033:1047#L29">Dispose</a></h2>
 			<pre>func Dispose()</pre>
 			<p>
 Clean-up. Call this when you&#39;re done working with this package and all allocated resources should be released.
@@ -205,7 +205,7 @@ Clean-up. Call this when you&#39;re done working with this package and all alloc
 		
 			
 			
-			<h2 id="Init">func <a href="/target/core.go?s=1506:1562#L41">Init</a></h2>
+			<h2 id="Init">func <a href="/target/core.go?s=1505:1561#L41">Init</a></h2>
 			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>, logger <a href="#Logger">Logger</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Initialization. Call this before working with this package.
@@ -258,13 +258,13 @@ An interface for log output. ObLogger provides the canonical implementation
 		
 			
 			
-			<h2 id="ObHive">type <a href="/target/ob-hive.go?s=564:785#L14">ObHive</a></h2>
+			<h2 id="ObHive">type <a href="/target/ob-hive.go?s=564:823#L14">ObHive</a></h2>
 			<pre>type ObHive struct {
     <span class="comment">//	The current Hive-directory path</span>
     DirPath <a href="/pkg/builtin/#string">string</a>
 
     <span class="comment">//	The uio.Watcher used for any and all Hive-directory change-event notifications.</span>
-    <span class="comment">//	This is nil if Opt.Sandboxed is true.</span>
+    <span class="comment">//	This is never nil; if Opt.Sandboxed is true, this is a no-op drop-in dummy.</span>
     Watch *<a href="/pkg/github.com/metaleap/go-util/io/">uio</a>.<a href="/pkg/github.com/metaleap/go-util/io/#Watcher">Watcher</a>
 }</pre>
 			<p>
@@ -290,17 +290,17 @@ Singleton type. Only valid use is the exported Hive variable.
 
 			
 				
-				<h3 id="ObHive.CreateLogFile">func (ObHive) <a href="/target/ob-hive.go?s=1025:1106#L33">CreateLogFile</a></h3>
+				<h3 id="ObHive.CreateLogFile">func (ObHive) <a href="/target/ob-hive.go?s=1036:1117#L31">CreateLogFile</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) CreateLogFile() (fullPath <a href="/pkg/builtin/#string">string</a>, newOutFile *<a href="/pkg/os/">os</a>.<a href="/pkg/os/#File">File</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
-Creates a new log file at: [Hive.DirPath]/log/[date-time].log
+Creates a new log file at: {Hive.DirPath}/log/{date-time}.log
 </p>
 
 				
 				
 			
 				
-				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=1530:1595#L44">GuessDirPath</a></h3>
+				<h3 id="ObHive.GuessDirPath">func (ObHive) <a href="/target/ob-hive.go?s=1541:1606#L42">GuessDirPath</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) GuessDirPath(userSpecified <a href="/pkg/builtin/#string">string</a>) (guess <a href="/pkg/builtin/#string">string</a>)</pre>
 				<p>
 Returns userSpecified if that is a valid Hive-directory path as per ObHive.IsHive(),
@@ -311,7 +311,7 @@ else returns the value of the OBHIVE environment variable (regardless of path va
 				
 			
 				
-				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1765:1808#L52">IsHive</a></h3>
+				<h3 id="ObHive.IsHive">func (ObHive) <a href="/target/ob-hive.go?s=1776:1819#L50">IsHive</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) IsHive(dirPath <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Returns true if the specified path points to a valid Hive-directory.
@@ -321,11 +321,11 @@ Returns true if the specified path points to a valid Hive-directory.
 				
 			
 				
-				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=2048:2108#L58">Path</a></h3>
+				<h3 id="ObHive.Path">func (ObHive) <a href="/target/ob-hive.go?s=2063:2123#L56">Path</a></h3>
 				<pre>func (_ <a href="#ObHive">ObHive</a>) Path(segments ...<a href="/pkg/builtin/#string">string</a>) (fullFsPath <a href="/pkg/builtin/#string">string</a>)</pre>
 				<p>
 Returns a cleaned Hive-relative path for the specified path segments.
-For example, if Hive.DirPath is &#34;obtest/test2&#34;, then Hive.Path(&#34;pkg&#34;, &#34;mysql&#34;) returns &#34;obtest/test2/pkg/mysql&#34;
+For example, if Hive.DirPath is &#34;obtest/hive&#34;, then Hive.Path(&#34;pkg&#34;, &#34;mysql&#34;) returns &#34;obtest/hive/pkg/mysql&#34;
 </p>
 
 				
@@ -363,7 +363,7 @@ Creates and returns a new ObLogger with the specified Out io.Writer
 
 			
 				
-				<h3 id="ObLogger.Criticalf">func (*ObLogger) <a href="/target/ob-diag.go?s=1989:2054#L62">Criticalf</a></h3>
+				<h3 id="ObLogger.Criticalf">func (*ObLogger) <a href="/target/ob-diag.go?s=1990:2055#L62">Criticalf</a></h3>
 				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Criticalf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
 				<p>
 Criticalf is like Debugf, but at Critical level
@@ -384,7 +384,7 @@ and records the text as a log message at Debug level
 				
 			
 				
-				<h3 id="ObLogger.Errorf">func (*ObLogger) <a href="/target/ob-diag.go?s=1789:1851#L55">Errorf</a></h3>
+				<h3 id="ObLogger.Errorf">func (*ObLogger) <a href="/target/ob-diag.go?s=1790:1852#L55">Errorf</a></h3>
 				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Errorf(format <a href="/pkg/builtin/#string">string</a>, args ...interface{})</pre>
 				<p>
 Errorf is like Debugf, but at Error level
@@ -394,7 +394,7 @@ Errorf is like Debugf, but at Error level
 				
 			
 				
-				<h3 id="ObLogger.Fatal">func (*ObLogger) <a href="/target/ob-diag.go?s=2182:2218#L69">Fatal</a></h3>
+				<h3 id="ObLogger.Fatal">func (*ObLogger) <a href="/target/ob-diag.go?s=2183:2219#L69">Fatal</a></h3>
 				<pre>func (me *<a href="#ObLogger">ObLogger</a>) Fatal(err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Fatal is like Criticalf, then panics

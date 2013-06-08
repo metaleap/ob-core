@@ -77,9 +77,6 @@ Web server functionality, used by the cmd/ob-server main package
 				
 				<dd><a href="#RequestContext">type RequestContext</a></dd>
 				
-					
-					<dd>&nbsp; &nbsp; <a href="#NewRequestContext">func NewRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext)</a></dd>
-				
 				
 			
 				
@@ -126,20 +123,17 @@ Web server functionality, used by the cmd/ob-server main package
     <span class="comment">//	The http.Server used to serve web requests</span>
     <span id="Http">Http</span> <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Server">Server</a>
 
-    <span class="comment">//	The http.Handler that maps to the [hive]/client/pub directory</span>
-    <span id="StaticFiles">StaticFiles</span> <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Handler">Handler</a>
-
-    <span class="comment">//	Request-routing multiplexer</span>
-    <span id="Mux">Mux</span> *<a href="/pkg/github.com/gorilla/mux/">mux</a>.<a href="/pkg/github.com/gorilla/mux/#Router">Router</a>
+    <span class="comment">//	Multi-plexing request router</span>
+    <span id="Router">Router</span> *<a href="/pkg/github.com/gorilla/mux/">mux</a>.<a href="/pkg/github.com/gorilla/mux/#Router">Router</a>
 
     <span class="comment">//	Custom event handlers</span>
     <span id="On">On</span> struct {
         <span class="comment">//	Request-related event handlers</span>
         Request struct {
-            <span class="comment">//	Event handlers to be invoked before serving a web request (except _static files)</span>
+            <span class="comment">//	Event handlers to be invoked before serving a web request (except static files)</span>
             Serving <a href="#RequestContextEventHandlers">RequestContextEventHandlers</a>
 
-            <span class="comment">//	Event handlers to be invoked immediately after serving a web request (except _static files)</span>
+            <span class="comment">//	Event handlers to be invoked immediately after serving a web request (except static files)</span>
             Served <a href="#RequestContextEventHandlers">RequestContextEventHandlers</a>
         }
     }
@@ -150,7 +144,7 @@ Web server functionality, used by the cmd/ob-server main package
 		
 			
 			
-			<h2 id="Init">func <a href="/target/server.go?s=743:754#L26">Init</a></h2>
+			<h2 id="Init">func <a href="/target/server.go?s=669:680#L24">Init</a></h2>
 			<pre>func Init()</pre>
 			<p>
 Initializes the package for serving web requests
@@ -160,7 +154,7 @@ Initializes the package for serving web requests
 		
 			
 			
-			<h2 id="ListenAndServe">func <a href="/target/server.go?s=1163:1232#L37">ListenAndServe</a></h2>
+			<h2 id="ListenAndServe">func <a href="/target/server.go?s=1526:1595#L42">ListenAndServe</a></h2>
 			<pre>func ListenAndServe(addr, tlsCertFile, tlsKeyFile <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Starts listening to and serving web requests.
@@ -172,7 +166,7 @@ Uses Transport Layer Security only if both tls arguments are specified.
 		
 			
 			
-			<h2 id="RequestContext">type <a href="/target/request-context.go?s=772:1134#L22">RequestContext</a></h2>
+			<h2 id="RequestContext">type <a href="/target/request-context.go?s=771:1133#L22">RequestContext</a></h2>
 			<pre>type RequestContext struct {
     <span class="comment">//	The http.ResponseWriter for this RequestContext</span>
     Out <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#ResponseWriter">ResponseWriter</a>
@@ -188,7 +182,7 @@ Uses Transport Layer Security only if both tls arguments are specified.
     Ctx interface{}
 }</pre>
 			<p>
-Encapsulates and provides context for a (non _static) web request
+Encapsulates and provides context for a (non-static) web request
 </p>
 
 
@@ -198,15 +192,6 @@ Encapsulates and provides context for a (non _static) web request
 
 			
 
-			
-				
-				<h3 id="NewRequestContext">func <a href="/target/request-context.go?s=1228:1332#L38">NewRequestContext</a></h3>
-				<pre>func NewRequestContext(httpResponse <a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#ResponseWriter">ResponseWriter</a>, httpRequest *<a href="/pkg/net/http/">http</a>.<a href="/pkg/net/http/#Request">Request</a>) (me *<a href="#RequestContext">RequestContext</a>)</pre>
-				<p>
-Creates and returns a new *RequestContext for the specified httpRequest and httpResponse
-</p>
-
-				
 			
 
 			

@@ -57,7 +57,7 @@ func (me *ObLogger) Infof(format string, args ...interface{}) {
 // Warningf is like Debugf, but at Warning level
 func (me *ObLogger) Warningf(format string, args ...interface{}) {
 	if me.Out != nil {
-		fmt.Fprintf(me.Out, "[WARN]\t\t"+format+"\n", args...)
+		fmt.Fprintf(me.Out, "[WARNING]\t"+format+"\n", args...)
 	}
 }
 

@@ -2,6 +2,7 @@ package obsrv
 
 import (
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,20 +14,17 @@ var (
 	//	The http.Server used to serve web requests
 	Http http.Server
 
-	//	The http.Handler that maps to the [hive]/client/pub directory
-	StaticFiles http.Handler
-
-	//	Request-routing multiplexer
-	Mux *mux.Router
+	//	Multi-plexing request router
+	Router *mux.Router
 
 	//	Custom event handlers
 	On struct {
 		//	Request-related event handlers
 		Request struct {
-			//	Event handlers to be invoked before serving a web request (except _static files)
+			//	Event handlers to be invoked before serving a web request (except static files)
 			Serving RequestContextEventHandlers
 
-			//	Event handlers to be invoked immediately after serving a web request (except _static files)
+			//	Event handlers to be invoked immediately after serving a web request (except static files)
 			Served RequestContextEventHandlers
 		}
 	}
@@ -34,11 +32,18 @@ var (
 
 //	Initializes the package for serving web requests
 func Init() {
-	StaticFiles = http.FileServer(http.Dir(ob.Hive.Path("client", "pub")))
-	Mux = mux.NewRouter()
-	Mux.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", StaticFiles))
-	Mux.PathPrefix("/").HandlerFunc(serveRequest)
-	Http.Handler = Mux
+	staticDist := http.FileServer(http.Dir(ob.Hive.Path("dist", "client", "pub")))
+	staticCust := http.FileServer(http.Dir(ob.Hive.Path("cust", "pub")))
+	custRoot := ob.Hive.Path("cust", "pub", "root")
+	staticCustRoot := http.StripPrefix("/", http.FileServer(http.Dir(custRoot)))
+	Router = mux.NewRouter()
+	Router.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", staticDist))
+	Router.PathPrefix("/_cust/").Handler(http.StripPrefix("/_cust/", staticCust))
+	ob.Hive.Watch.WatchFiles(custRoot, "*.*", true, func(filePath string) {
+		Router.Path("/" + filepath.Base(filePath)).Handler(staticCustRoot)
+	})
+	Router.PathPrefix("/").HandlerFunc(serveRequest)
+	Http.Handler = Router
 	Http.ReadTimeout = 2 * time.Minute
 }
 

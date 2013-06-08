@@ -7,7 +7,7 @@ import (
 )
 
 func serveRequest(w http.ResponseWriter, r *http.Request) {
-	rc := NewRequestContext(w, r)
+	rc := newRequestContext(w, r)
 	for _, on := range On.Request.Serving {
 		on(rc)
 	}
@@ -28,7 +28,7 @@ func (me *RequestContextEventHandlers) Add(eventHandlers ...RequestContextEventH
 	*me = append(*me, eventHandlers...)
 }
 
-//	Encapsulates and provides context for a (non _static) web request
+//	Encapsulates and provides context for a (non-static) web request
 type RequestContext struct {
 	//	The http.ResponseWriter for this RequestContext
 	Out http.ResponseWriter
@@ -44,8 +44,7 @@ type RequestContext struct {
 	Ctx interface{}
 }
 
-//	Creates and returns a new *RequestContext for the specified httpRequest and httpResponse
-func NewRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
+func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
 	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log}
 	return
 }

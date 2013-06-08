@@ -14,7 +14,7 @@ const (
 var (
 	//	Runtime options
 	Opt struct {
-		//	Set via Init(), must not be nil even if logging is disabled
+		//	Set via Init(), never nil (even if logging is disabled)
 		Log Logger
 
 		//	Set this to true before calling Init() if the runtime is a sandboxed environment (such
@@ -24,7 +24,7 @@ var (
 		//	Set to true before Init() in cmd/ob-server/main.go.
 		//	Should remain false in practically all other scenarios.
 		//	(If true, much additional logic is executed and server-related resources allocated that
-		//	are unneeded when importing this package in a "server-side, server-less client" scenario.)
+		//	are unneeded when importing this package in a "server-side but server-less client" scenario.)
 		Server bool
 
 		initTime time.Time
