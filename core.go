@@ -29,6 +29,8 @@ var (
 
 		initTime time.Time
 	}
+
+	RootHub *ObHub
 )
 
 func strf(format string, args ...interface{}) string {

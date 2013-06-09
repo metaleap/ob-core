@@ -68,8 +68,6 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				<dd><a href="#pkg-constants">Constants</a></dd>
 			
 			
-				<dd><a href="#pkg-variables">Variables</a></dd>
-			
 			
 				
 				<dd><a href="#Dispose">func Dispose()</a></dd>
@@ -98,6 +96,14 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#ObHive.Path">func (_ ObHive) Path(segments ...string) (fullFsPath string)</a></dd>
+				
+			
+				
+				<dd><a href="#ObHub">type ObHub</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ObHub.Parent">func (me *ObHub) Parent() (parent *ObHub)</a></dd>
 				
 			
 				
@@ -145,6 +151,8 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 			
 				<a href="/target/ob-hive.go">ob-hive.go</a>
 			
+				<a href="/target/ob-hub.go">ob-hub.go</a>
+			
 			</span>
 			</p>
 		
@@ -169,33 +177,10 @@ Core (&#39;kernel&#39;-level, but server-less) functionality package
 			
 		
 		
-			<h2 id="pkg-variables">Variables</h2>
-			
-				<pre>var (
-    <span class="comment">//	Runtime options</span>
-    <span id="Opt">Opt</span> struct {
-        <span class="comment">//	Set via Init(), never nil (even if logging is disabled)</span>
-        Log <a href="#Logger">Logger</a>
-
-        <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
-        <span class="comment">//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)</span>
-        Sandboxed <a href="/pkg/builtin/#bool">bool</a>
-
-        <span class="comment">//	Set to true before Init() in cmd/ob-server/main.go.</span>
-        <span class="comment">//	Should remain false in practically all other scenarios.</span>
-        <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
-        <span class="comment">//	are unneeded when importing this package in a &#34;server-side but server-less client&#34; scenario.)</span>
-        Server <a href="/pkg/builtin/#bool">bool</a>
-        <span class="comment">// contains filtered or unexported fields</span>
-    }
-)</pre>
-				
-			
-		
 		
 			
 			
-			<h2 id="Dispose">func <a href="/target/core.go?s=1033:1047#L29">Dispose</a></h2>
+			<h2 id="Dispose">func <a href="/target/core.go?s=1050:1064#L31">Dispose</a></h2>
 			<pre>func Dispose()</pre>
 			<p>
 Clean-up. Call this when you&#39;re done working with this package and all allocated resources should be released.
@@ -205,7 +190,7 @@ Clean-up. Call this when you&#39;re done working with this package and all alloc
 		
 			
 			
-			<h2 id="Init">func <a href="/target/core.go?s=1505:1561#L41">Init</a></h2>
+			<h2 id="Init">func <a href="/target/core.go?s=1522:1578#L43">Init</a></h2>
 			<pre>func Init(hiveDirPath <a href="/pkg/builtin/#string">string</a>, logger <a href="#Logger">Logger</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Initialization. Call this before working with this package.
@@ -328,6 +313,53 @@ Returns a cleaned Hive-relative path for the specified path segments.
 For example, if Hive.DirPath is &#34;obtest/hive&#34;, then Hive.Path(&#34;pkg&#34;, &#34;mysql&#34;) returns &#34;obtest/hive/pkg/mysql&#34;
 </p>
 
+				
+				
+			
+		
+			
+			
+			<h2 id="ObHub">type <a href="/target/ob-hub.go?s=16:52#L1">ObHub</a></h2>
+			<pre>type ObHub struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			
+
+			
+
+			
+				<pre>var (
+    <span class="comment">//	Runtime options</span>
+    <span id="Opt">Opt</span> struct {
+        <span class="comment">//	Set via Init(), never nil (even if logging is disabled)</span>
+        Log <a href="#Logger">Logger</a>
+
+        <span class="comment">//	Set this to true before calling Init() if the runtime is a sandboxed environment (such</span>
+        <span class="comment">//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)</span>
+        Sandboxed <a href="/pkg/builtin/#bool">bool</a>
+
+        <span class="comment">//	Set to true before Init() in cmd/ob-server/main.go.</span>
+        <span class="comment">//	Should remain false in practically all other scenarios.</span>
+        <span class="comment">//	(If true, much additional logic is executed and server-related resources allocated that</span>
+        <span class="comment">//	are unneeded when importing this package in a &#34;server-side but server-less client&#34; scenario.)</span>
+        Server <a href="/pkg/builtin/#bool">bool</a>
+        <span class="comment">// contains filtered or unexported fields</span>
+    }
+
+    <span id="RootHub">RootHub</span> *<a href="#ObHub">ObHub</a>
+)</pre>
+				
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="ObHub.Parent">func (*ObHub) <a href="/target/ob-hub.go?s=54:95#L1">Parent</a></h3>
+				<pre>func (me *<a href="#ObHub">ObHub</a>) Parent() (parent *<a href="#ObHub">ObHub</a>)</pre>
+				
 				
 				
 			
