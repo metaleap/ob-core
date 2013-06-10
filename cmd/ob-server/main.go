@@ -26,7 +26,7 @@ func main() {
 	//	pre-init
 	if len(*dirPath) == 0 {
 		*dirPath, _ = os.Getwd()
-		*dirPath = ob.Hive.GuessDirPath(*dirPath)
+		*dirPath = ob.Hive.GuessDir(*dirPath)
 	}
 	ob.Opt.Server = true
 
@@ -49,6 +49,7 @@ func main() {
 		if logFilePath, logFile, err = ob.Hive.CreateLogFile(); err != nil {
 			log.Fatal(err)
 		} else {
+			defer logFile.Close()
 			log.Infof("Log file: %s", logFilePath)
 			log.Out = logFile
 		}

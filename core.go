@@ -2,6 +2,7 @@ package obcore
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
 	"time"
 )
@@ -29,20 +30,11 @@ var (
 
 		initTime time.Time
 	}
-
-	RootHub *ObHub
 )
-
-func strf(format string, args ...interface{}) string {
-	return fmt.Sprintf(format, args...)
-}
 
 //	Clean-up. Call this when you're done working with this package and all allocated resources should be released.
 func Dispose() {
-	if Hive.Watch != nil {
-		Hive.Watch.Close()
-		Hive.Watch = nil
-	}
+	Hive.dispose()
 }
 
 //	Initialization. Call this before working with this package.
@@ -60,12 +52,23 @@ func Init(hiveDirPath string, logger Logger) (err error) {
 	}
 	if !Opt.Sandboxed {
 		if hiveDirPath, err = filepath.Abs(hiveDirPath); (err == nil) && !Hive.IsHive(hiveDirPath) {
-			err = fmt.Errorf("Not a valid %s Hive directory installation: '%s'.", OB_TITLE, hiveDirPath)
+			err = errf("Not a valid %s Hive directory installation: '%s'.", OB_TITLE, hiveDirPath)
 		}
 	}
 	if err == nil {
-		Hive.DirPath = hiveDirPath
-		err = Hive.init()
+		err = Hive.init(hiveDirPath)
 	}
 	return
+}
+
+func errf(format string, args ...interface{}) error {
+	return fmt.Errorf(format, args...)
+}
+
+func outf(w io.Writer, format string, args ...interface{}) {
+	fmt.Fprintf(w, format, args...)
+}
+
+func strf(format string, args ...interface{}) string {
+	return fmt.Sprintf(format, args...)
 }

@@ -1,10 +1,7 @@
 package obcore
 
 import (
-	"fmt"
 	"io"
-
-	// log "github.com/goforks/seelog"
 )
 
 //	An interface for log output. ObLogger provides the canonical implementation
@@ -45,35 +42,35 @@ func NewLogger(out io.Writer) (me *ObLogger) {
 // and records the text as a log message at Debug level
 func (me *ObLogger) Debugf(format string, args ...interface{}) {
 	if me.Out != nil {
-		fmt.Fprintf(me.Out, "[DEBUG]\t\t"+format+"\n", args...)
+		outf(me.Out, "[DEBUG]\t\t"+format+"\n", args...)
 	}
 }
 
 // Infof is like Debugf, but at Info level
 func (me *ObLogger) Infof(format string, args ...interface{}) {
 	if me.Out != nil {
-		fmt.Fprintf(me.Out, "[INFO]\t\t"+format+"\n", args...)
+		outf(me.Out, "[INFO]\t\t"+format+"\n", args...)
 	}
 }
 
 // Warningf is like Debugf, but at Warning level
 func (me *ObLogger) Warningf(format string, args ...interface{}) {
 	if me.Out != nil {
-		fmt.Fprintf(me.Out, "[WARNING]\t"+format+"\n", args...)
+		outf(me.Out, "[WARNING]\t"+format+"\n", args...)
 	}
 }
 
 // Errorf is like Debugf, but at Error level
 func (me *ObLogger) Errorf(format string, args ...interface{}) {
 	if me.Out != nil {
-		fmt.Fprintf(me.Out, "[ERROR]\t\t"+format+"\n", args...)
+		outf(me.Out, "[ERROR]\t\t"+format+"\n", args...)
 	}
 }
 
 // Criticalf is like Debugf, but at Critical level
 func (me *ObLogger) Criticalf(format string, args ...interface{}) {
 	if me.Out != nil {
-		fmt.Fprintf(me.Out, "[CRITICAL]\t"+format+"\n", args...)
+		outf(me.Out, "[CRITICAL]\t"+format+"\n", args...)
 	}
 }
 

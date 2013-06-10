@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gorilla/mux"
+	uio "github.com/metaleap/go-util/io"
+
+	webmux "github.com/gorilla/mux"
 
 	ob "github.com/openbase/ob-core"
 )
@@ -15,33 +17,36 @@ var (
 	Http http.Server
 
 	//	Multi-plexing request router
-	Router *mux.Router
-
-	//	Custom event handlers
-	On struct {
-		//	Request-related event handlers
-		Request struct {
-			//	Event handlers to be invoked before serving a web request (except static files)
-			Serving RequestContextEventHandlers
-
-			//	Event handlers to be invoked immediately after serving a web request (except static files)
-			Served RequestContextEventHandlers
-		}
-	}
+	Router *webmux.Router
 )
+
+type dualStaticHandler struct {
+	distDir, custDir string
+	distSrv, custSrv http.Handler
+}
+
+func newDualStaticHandler(distDir, custDir string) (me *dualStaticHandler) {
+	me = &dualStaticHandler{distDir: distDir, custDir: custDir}
+	me.distSrv, me.custSrv = http.FileServer(http.Dir(distDir)), http.FileServer(http.Dir(custDir))
+	return
+}
+
+func (me *dualStaticHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if uio.FileExists(filepath.Join(me.custDir, r.URL.Path)) {
+		me.custSrv.ServeHTTP(w, r)
+	} else {
+		me.distSrv.ServeHTTP(w, r)
+	}
+}
 
 //	Initializes the package for serving web requests
 func Init() {
-	staticDist := http.FileServer(http.Dir(ob.Hive.Path("dist", "client", "pub")))
-	staticCust := http.FileServer(http.Dir(ob.Hive.Path("cust", "pub")))
-	custRoot := ob.Hive.Path("cust", "pub", "root")
-	staticCustRoot := http.StripPrefix("/", http.FileServer(http.Dir(custRoot)))
-	Router = mux.NewRouter()
-	Router.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", staticDist))
-	Router.PathPrefix("/_cust/").Handler(http.StripPrefix("/_cust/", staticCust))
-	ob.Hive.Watch.WatchFiles(custRoot, "*.*", true, func(filePath string) {
-		Router.Path("/" + filepath.Base(filePath)).Handler(staticCustRoot)
-	})
+	Router = webmux.NewRouter()
+	Router.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", http.FileServer(http.Dir(ob.Hive.Subs.Dist.Paths.ClientPub))))
+	Router.PathPrefix("/_cust/").Handler(http.StripPrefix("/_cust/", http.FileServer(http.Dir(ob.Hive.Subs.Cust.Paths.ClientPub))))
+	dual := newDualStaticHandler(ob.Hive.Subs.Dist.Paths.ClientPub, ob.Hive.Subs.Cust.Paths.ClientPub)
+	Router.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", dual))
+	Router.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
 	Router.PathPrefix("/").HandlerFunc(serveRequest)
 	Http.Handler = Router
 	Http.ReadTimeout = 2 * time.Minute
