@@ -1,6 +1,7 @@
 package obsrv
 
 import (
+	"bytes"
 	"net/http"
 
 	webctx "github.com/gorilla/context"
@@ -35,7 +36,7 @@ func serveRequest(w http.ResponseWriter, r *http.Request) {
 
 //	Encapsulates and provides context for a (non-static) web request
 type RequestContext struct {
-	Page *ob.Page
+	PageTemplate *ob.PageTemplate
 
 	//	The http.ResponseWriter for this RequestContext
 	Out http.ResponseWriter
@@ -52,16 +53,24 @@ type RequestContext struct {
 }
 
 func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
-	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log, Page: ob.NewPage()}
+	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log}
+	me.PageTemplate = ob.GetPageTemplate("default")
 	return
 }
 
 func (me *RequestContext) Get(key interface{}) interface{} {
+	return key
 	return webctx.Get(me.Req, key)
 }
 
 func (me *RequestContext) serveRequest() {
-	me.Out.Write([]byte("Hello Duders"))
+	var w bytes.Buffer
+	err := me.PageTemplate.Execute(&w, me)
+	if err == nil {
+		me.Out.Write(w.Bytes())
+	} else {
+		me.Out.Write([]byte(err.Error()))
+	}
 }
 
 func (me *RequestContext) Set(key, val interface{}) {

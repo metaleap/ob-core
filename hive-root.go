@@ -26,7 +26,7 @@ type HiveRoot struct {
 	//	The current Hive-directory path, set via Hive.Init()
 	Dir string
 
-	Watch *uio.Watcher
+	fsWatcher *uio.Watcher
 
 	Paths struct {
 		Logs string
@@ -47,9 +47,9 @@ func (me *HiveRoot) CreateLogFile() (fullPath string, newOutFile *os.File, err e
 }
 
 func (me *HiveRoot) dispose() {
-	if me.Watch != nil {
-		me.Watch.Close()
-		me.Watch = nil
+	if me.fsWatcher != nil {
+		me.fsWatcher.Close()
+		me.fsWatcher = nil
 	}
 }
 
@@ -81,9 +81,9 @@ func (me *HiveRoot) Init(dir string) {
 
 func (me *HiveRoot) init(dir string) (err error) {
 	me.Init(dir)
-	if me.Watch == nil {
-		if me.Watch, err = uio.NewWatcher(); err == nil && me.Watch != nil {
-			go me.Watch.Go()
+	if me.fsWatcher == nil {
+		if me.fsWatcher, err = uio.NewWatcher(); err == nil && me.fsWatcher != nil {
+			go me.fsWatcher.Go()
 		}
 	}
 	return
@@ -99,6 +99,17 @@ func (_ *HiveRoot) IsHive(dir string) bool {
 func (me *HiveRoot) Path(relPath ...string) (fullFsPath string) {
 	if fullFsPath = filepath.Join(relPath...); len(me.Dir) > 0 {
 		fullFsPath = filepath.Join(me.Dir, fullFsPath)
+	}
+	return
+}
+
+func (me *HiveRoot) watchDualDir(handler uio.WatcherHandler, subRelPath ...string) (err error) {
+	err2 := me.fsWatcher.WatchDir(me.Subs.Cust.Path(subRelPath...), false, handler)
+	if err = me.fsWatcher.WatchDir(me.Subs.Dist.Path(subRelPath...), true, handler); err == nil {
+		err = err2
+	}
+	if err != nil {
+		panic(err)
 	}
 	return
 }
