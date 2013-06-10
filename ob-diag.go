@@ -3,6 +3,8 @@ package obcore
 import (
 	"fmt"
 	"io"
+
+	// log "github.com/goforks/seelog"
 )
 
 //	An interface for log output. ObLogger provides the canonical implementation

@@ -3,6 +3,8 @@ package obsrv
 import (
 	"net/http"
 
+	ctx "github.com/gorilla/context"
+
 	ob "github.com/openbase/ob-core"
 )
 
@@ -47,4 +49,12 @@ type RequestContext struct {
 func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
 	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log}
 	return
+}
+
+func (me *RequestContext) Get(key interface{}) interface{} {
+	return ctx.Get(me.Req, key)
+}
+
+func (me *RequestContext) Set(key, val interface{}) {
+	ctx.Set(me.Req, key, val)
 }
