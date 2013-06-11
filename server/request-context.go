@@ -7,6 +7,7 @@ import (
 	webctx "github.com/gorilla/context"
 
 	ob "github.com/openbase/ob-core"
+	obwebui "github.com/openbase/ob-core/webui"
 )
 
 var (
@@ -36,7 +37,9 @@ func serveRequest(w http.ResponseWriter, r *http.Request) {
 
 //	Encapsulates and provides context for a (non-static) web request
 type RequestContext struct {
-	PageTemplate *ob.PageTemplate
+	obwebui.PageContext
+
+	PageTemplate *obwebui.PageTemplate
 
 	//	The http.ResponseWriter for this RequestContext
 	Out http.ResponseWriter
@@ -54,7 +57,8 @@ type RequestContext struct {
 
 func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
 	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log}
-	me.PageTemplate = ob.GetPageTemplate("default")
+	me.PageTemplate = obwebui.GetPageTemplate("default")
+	me.PageContext.Init()
 	return
 }
 

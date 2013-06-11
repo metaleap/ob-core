@@ -1,4 +1,4 @@
-package obcore
+package obwebui
 
 import (
 	"html/template"
@@ -8,6 +8,8 @@ import (
 	"sync"
 
 	uio "github.com/metaleap/go-util/io"
+
+	ob "github.com/openbase/ob-core"
 )
 
 var (
@@ -59,5 +61,5 @@ func (me *PageTemplate) load() {
 		}
 		return
 	}
-	Hive.watchDualDir(loader, "client", "tmpl", me.name)
+	ob.Hive.WatchDualDir(loader, "client", "tmpl", me.name)
 }
