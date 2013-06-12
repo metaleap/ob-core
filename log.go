@@ -16,6 +16,9 @@ type Logger interface {
 	// Warningf is like Debugf, but at Warning level
 	Warningf(format string, args ...interface{})
 
+	// Error is like Debugf, but at Error level
+	Error(err error) error
+
 	// Errorf is like Debugf, but at Error level
 	Errorf(format string, args ...interface{})
 
@@ -60,10 +63,16 @@ func (me *ObLogger) Warningf(format string, args ...interface{}) {
 	}
 }
 
+// Error is like Debugf, but at Error level. Returns err.
+func (me *ObLogger) Error(err error) error {
+	me.Errorf(err.Error())
+	return err
+}
+
 // Errorf is like Debugf, but at Error level
 func (me *ObLogger) Errorf(format string, args ...interface{}) {
 	if me.Out != nil {
-		outf(me.Out, "[ERROR]\t\t"+format+"\n", args...)
+		outf(me.Out, "[ERROR]\t\t"+format+"\n", args)
 	}
 }
 

@@ -43,7 +43,7 @@ func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent b
 			log.Fatal(err)
 		} else {
 			defer logFile.Close()
-			log.Infof("Log file: %s", logFilePath)
+			log.Infof("LOG @ %s", logFilePath)
 			log.Out = logFile
 		}
 	}

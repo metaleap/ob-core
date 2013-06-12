@@ -2,7 +2,6 @@ package obwebui
 
 import (
 	"html/template"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -46,14 +45,18 @@ func newPageTemplate(name string) (me *PageTemplate) {
 }
 
 func (me *PageTemplate) load() {
+	//	currently NOT proper "dual-dir" handling!
 	loader := func(dirPath string) {
+		if strings.Contains(dirPath, "cust") {
+			return
+		}
 		fileNames := []string{filepath.Join(dirPath, me.name+".html")}
-		uio.NewDirWalker(false, nil, func(_ *uio.DirWalker, fullPath string, _ os.FileInfo) bool {
+		uio.WalkFilesIn(dirPath, func(fullPath string) bool {
 			if !strings.HasSuffix(fullPath, string(filepath.Separator)+me.name+".html") {
 				fileNames = append(fileNames, fullPath)
 			}
 			return true
-		}).Walk(dirPath)
+		})
 		var err error
 		me.Template, err = template.ParseFiles(fileNames...)
 		if err != nil {
