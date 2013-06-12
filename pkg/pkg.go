@@ -5,6 +5,10 @@ import (
 	"io"
 )
 
+type PkgCfgReloader func(pkg *Package)
+
+var PkgCfgLoaders = map[string]PkgCfgReloader{}
+
 func errf(format string, args ...interface{}) error {
 	return fmt.Errorf(format, args...)
 }

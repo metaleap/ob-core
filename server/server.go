@@ -3,6 +3,7 @@ package obsrv
 import (
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 
 	uio "github.com/metaleap/go-util/io"
@@ -32,7 +33,9 @@ func newDualStaticHandler(distDir, custDir string) (me *dualStaticHandler) {
 }
 
 func (me *dualStaticHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if uio.FileExists(filepath.Join(me.custDir, r.URL.Path)) {
+	if strings.HasPrefix(filepath.Ext(r.URL.Path), ".ob-") {
+		http.Error(w, "Forbidden", 403)
+	} else if uio.FileExists(filepath.Join(me.custDir, r.URL.Path)) {
 		me.custSrv.ServeHTTP(w, r)
 	} else {
 		me.distSrv.ServeHTTP(w, r)
@@ -47,6 +50,8 @@ func Init() {
 	dual := newDualStaticHandler(ob.Hive.Subs.Dist.Paths.ClientPub, ob.Hive.Subs.Cust.Paths.ClientPub)
 	Router.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", dual))
 	Router.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
+	dual = newDualStaticHandler(ob.Hive.Subs.Dist.Paths.Pkg, ob.Hive.Subs.Cust.Paths.Pkg)
+	Router.PathPrefix("/_pkg/").Handler(http.StripPrefix("/_pkg/", dual))
 	Router.PathPrefix("/").HandlerFunc(serveRequest)
 	Http.Handler = Router
 	Http.ReadTimeout = 2 * time.Minute

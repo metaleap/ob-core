@@ -1,11 +1,13 @@
 package obpkg
 
 import (
+	"path/filepath"
+
 	"github.com/goforks/toml"
 
-	ob "github.com/openbase/ob-core"
-
 	usl "github.com/metaleap/go-util/slice"
+
+	ob "github.com/openbase/ob-core"
 )
 
 type PkgCfg map[string]interface{}
@@ -20,32 +22,34 @@ type Package struct {
 		Require []string
 	}
 
-	Config struct {
+	Cfg interface{}
+
+	CfgRaw struct {
 		Default PkgCfg
 		More    map[string]PkgCfg
 	}
 
-	Error error
+	Err error
 	// IsCust, HasCust      bool
-	Kind, Name, NameFull string
+	Dir, Kind, Name, NameFull string
 }
 
 func newPackage() (me *Package) {
 	me = &Package{}
-	me.Config.Default, me.Config.More = PkgCfg{}, map[string]PkgCfg{}
+	me.CfgRaw.Default, me.CfgRaw.More = PkgCfg{}, map[string]PkgCfg{}
 	return
 }
 
-//	This may load from the primary dist .obpkg file, or just partial additions/overrides from cust
+//	This may load from the primary dist .ob-pkg file, or just partial additions/overrides from cust
 func (me *Package) reload(kind, name, fullName, filePath string) {
-	me.Kind, me.Name, me.NameFull = kind, name, fullName
+	me.Dir, me.Kind, me.Name, me.NameFull = filepath.Dir(filePath), kind, name, fullName
 	cfg := map[string]interface{}{}
 	s := func(m map[string]interface{}, name string) (s string) {
 		s, _ = m[name].(string)
 		return
 	}
-	if _, me.Error = toml.DecodeFile(filePath, cfg); me.Error != nil {
-		ob.Opt.Log.Error(me.Error)
+	if _, me.Err = toml.DecodeFile(filePath, cfg); me.Err != nil {
+		ob.Opt.Log.Errorf("[PKG] %s", me.Err.Error())
 	} else {
 		var (
 			ok                 bool
@@ -61,13 +65,16 @@ func (me *Package) reload(kind, name, fullName, filePath string) {
 		}
 		if cfgDefault, ok = cfg["default"].(map[string]interface{}); ok {
 			for key, val = range cfgDefault {
-				me.Config.Default[key] = val
+				me.CfgRaw.Default[key] = val
 			}
 		}
 		for key, val = range cfg {
 			if key != "pkg" && key != "default" {
-				println("MORE:" + key)
+				// println("MORE:" + key)
 			}
+		}
+		if loader := PkgCfgLoaders[kind]; loader != nil {
+			loader(me)
 		}
 	}
 	if len(me.Info.Title) == 0 {

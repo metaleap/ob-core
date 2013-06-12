@@ -11,14 +11,14 @@ type HiveSub struct {
 	root *HiveRoot
 
 	Paths struct {
-		Client, ClientPub string
+		Client, ClientPub, Pkg string
 	}
 }
 
 func (me *HiveSub) init(root *HiveRoot, name string) {
 	me.root, me.name = root, []string{name}
 	p := &me.Paths
-	p.Client, p.ClientPub = me.Path("client"), me.Path("client", "pub")
+	p.Client, p.ClientPub, p.Pkg = me.Path("client"), me.Path("client", "pub"), me.Path("pkg")
 }
 
 func (me *HiveSub) FileExists(relPath ...string) bool {

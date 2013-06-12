@@ -19,5 +19,7 @@ func main() {
 	silent := flag.Bool("silent", false, "If true, nothing is ever written to standard-output.\n")
 	flag.Parse()
 	//	run until the Halting Problem is solved
-	obsrv.Main(*dirPath, *addr, *tlsCertFile, *tlsKeyFile, *logToFile, *silent)
+	if err := obsrv.Main(*dirPath, *addr, *tlsCertFile, *tlsKeyFile, *logToFile, *silent); err != nil {
+		panic(err)
+	}
 }

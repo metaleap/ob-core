@@ -3,14 +3,12 @@ package obwebui
 import (
 	"fmt"
 	"io"
+
+	obpkg_webuilib "github.com/openbase/ob-core/pkg/webuilib"
 )
 
-type WebUI struct {
-	Libs []WebUILib
-}
-
-type WebUILib struct {
-	CssUrls, JsUrls []string
+type WebUi struct {
+	Libs []*obpkg_webuilib.PkgCfg
 }
 
 func errf(format string, args ...interface{}) error {

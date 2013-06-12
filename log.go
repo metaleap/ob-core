@@ -2,6 +2,7 @@ package obcore
 
 import (
 	"io"
+	"log"
 )
 
 //	An interface for log output. ObLogger provides the canonical implementation
@@ -24,42 +25,41 @@ type Logger interface {
 
 	// Criticalf is like Debugf, but at Critical level
 	Criticalf(format string, args ...interface{})
-
-	//	Fatal is like Criticalf, then panics
-	Fatal(err error)
 }
 
 //	The canonical implementation of the Logger interface
 type ObLogger struct {
-	//	Unless nil, all logging methods write to Out
-	Out io.Writer
+	logger *log.Logger
 }
 
 //	Creates and returns a new ObLogger with the specified Out io.Writer
 func NewLogger(out io.Writer) (me *ObLogger) {
-	me = &ObLogger{Out: out}
+	me = &ObLogger{}
+	if out != nil {
+		me.logger = log.New(out, "", log.LstdFlags)
+	}
 	return
 }
 
 // Debugf formats its arguments according to the format, analogous to fmt.Printf,
 // and records the text as a log message at Debug level
 func (me *ObLogger) Debugf(format string, args ...interface{}) {
-	if me.Out != nil {
-		outf(me.Out, "[DEBUG]\t\t"+format+"\n", args...)
+	if me.logger != nil {
+		me.logger.Printf("[DEBUG]\t\t"+format+"\n", args...)
 	}
 }
 
 // Infof is like Debugf, but at Info level
 func (me *ObLogger) Infof(format string, args ...interface{}) {
-	if me.Out != nil {
-		outf(me.Out, "[INFO]\t\t"+format+"\n", args...)
+	if me.logger != nil {
+		me.logger.Printf("[INFO]\t\t"+format+"\n", args...)
 	}
 }
 
 // Warningf is like Debugf, but at Warning level
 func (me *ObLogger) Warningf(format string, args ...interface{}) {
-	if me.Out != nil {
-		outf(me.Out, "[WARNING]\t"+format+"\n", args...)
+	if me.logger != nil {
+		me.logger.Printf("[WARNING]\t"+format+"\n", args...)
 	}
 }
 
@@ -71,20 +71,14 @@ func (me *ObLogger) Error(err error) error {
 
 // Errorf is like Debugf, but at Error level
 func (me *ObLogger) Errorf(format string, args ...interface{}) {
-	if me.Out != nil {
-		outf(me.Out, "[ERROR]\t\t"+format+"\n", args)
+	if me.logger != nil {
+		me.logger.Printf("[ERROR]\t\t"+format+"\n", args...)
 	}
 }
 
 // Criticalf is like Debugf, but at Critical level
 func (me *ObLogger) Criticalf(format string, args ...interface{}) {
-	if me.Out != nil {
-		outf(me.Out, "[CRITICAL]\t"+format+"\n", args...)
+	if me.logger != nil {
+		me.logger.Printf("[CRITICAL]\t"+format+"\n", args...)
 	}
-}
-
-//	Fatal is like Criticalf, then panics
-func (me *ObLogger) Fatal(err error) {
-	me.Criticalf("FATAL: %+v", err)
-	panic(err)
 }

@@ -12,10 +12,9 @@ import (
 //	Called by func main() in cmd/ob-server/main.go package.
 //	In theory, you could 'abuse' this by writing your own custom server
 //	executable instead of using ob-server, but this isn't really intended.
+//
 //	(Do note, this function does run 'forever' and thus defers all cleanups.)
-func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent bool) {
-	var err error
-
+func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent bool) (err error) {
 	//	pre-init
 	if len(hiveDir) == 0 {
 		hiveDir, _ = os.Getwd()
@@ -24,33 +23,31 @@ func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent b
 	ob.Opt.Server = true
 
 	//	init
-	log := ob.NewLogger(os.Stdout)
-	if silent {
-		log.Out = nil
-	}
-	if err = ob.Init(hiveDir, log); err != nil {
-		log.Fatal(err)
+	logger := ob.NewLogger(ugo.Ifw(silent, nil, os.Stdout))
+	if err = ob.Init(hiveDir, logger); err != nil {
+		return
 	}
 	defer ob.Dispose()
 
-	//	create log file?
+	//	create logger file?
 	if logToFile {
 		var (
 			logFile     *os.File
 			logFilePath string
 		)
 		if logFilePath, logFile, err = ob.Hive.CreateLogFile(); err != nil {
-			log.Fatal(err)
+			return err
 		} else {
 			defer logFile.Close()
-			log.Infof("LOG @ %s", logFilePath)
-			log.Out = logFile
+			logger.Infof("LOG @ %s", logFilePath)
+			logger = ob.NewLogger(logFile)
+			ob.Opt.Log = logger
 		}
 	}
 
 	//	all systems go!
 	proto := ugo.Ifs(len(tlsCertFile) > 0 && len(tlsKeyFile) > 0, "https", "http")
-	log.Infof("LIVE @ %s://%s%s", proto, ugo.HostName(), ustr.StripSuffix(httpAddr, ":"+proto))
+	logger.Infof("LIVE @ %s://%s%s", proto, ugo.HostName(), ustr.StripSuffix(httpAddr, ":"+proto))
 	Init()
-	log.Fatal(ListenAndServe(httpAddr, tlsCertFile, tlsKeyFile))
+	return ListenAndServe(httpAddr, tlsCertFile, tlsKeyFile)
 }
