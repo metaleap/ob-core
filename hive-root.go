@@ -103,9 +103,9 @@ func (me *HiveRoot) Path(relPath ...string) (fullFsPath string) {
 	return
 }
 
-func (me *HiveRoot) WatchDualDir(handler uio.WatcherHandler, subRelPath ...string) (err error) {
-	if err = me.fsWatcher.WatchDir(me.Subs.Dist.Path(subRelPath...), true, handler); err == nil {
-		err = me.fsWatcher.WatchDir(me.Subs.Cust.Path(subRelPath...), true, handler)
+func (me *HiveRoot) WatchDualDir(handler uio.WatcherHandler, runHandlerNow bool, subRelPath ...string) (err error) {
+	if err = me.fsWatcher.WatchDir(me.Subs.Dist.Path(subRelPath...), runHandlerNow, handler); err == nil {
+		err = me.fsWatcher.WatchDir(me.Subs.Cust.Path(subRelPath...), runHandlerNow, handler)
 	}
 	return
 }

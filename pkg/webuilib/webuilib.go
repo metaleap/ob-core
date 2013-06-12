@@ -26,6 +26,7 @@ func reloadPkgCfg(pkg *obpkg.Package) {
 	cfg.Css = usl.StrConvert(css, true)
 	js, _ := pkg.CfgRaw.Default["js"].([]interface{})
 	cfg.Js = usl.StrConvert(js, true)
+	cfg.Versions = []string{}
 	uio.WalkDirsIn(pkg.Dir, func(dirPath string) bool {
 		usl.StrAppendUnique(&cfg.Versions, filepath.Base(dirPath))
 		return true

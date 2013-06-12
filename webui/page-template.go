@@ -64,5 +64,5 @@ func (me *PageTemplate) load() {
 		}
 		return
 	}
-	ob.Hive.WatchDualDir(loader, "client", "tmpl", me.name)
+	ob.Hive.WatchDualDir(loader, true, "client", "tmpl", me.name)
 }

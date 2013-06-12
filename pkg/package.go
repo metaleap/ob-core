@@ -10,10 +10,6 @@ import (
 	ob "github.com/openbase/ob-core"
 )
 
-type PkgCfg map[string]interface{}
-
-type Packages []*Package
-
 type Package struct {
 	Info struct {
 		Title   string
@@ -29,8 +25,11 @@ type Package struct {
 		More    map[string]PkgCfg
 	}
 
-	Err error
-	// IsCust, HasCust      bool
+	Diag struct {
+		BadDeps []string
+		LoadErr error
+	}
+
 	Dir, Kind, Name, NameFull string
 }
 
@@ -48,8 +47,8 @@ func (me *Package) reload(kind, name, fullName, filePath string) {
 		s, _ = m[name].(string)
 		return
 	}
-	if _, me.Err = toml.DecodeFile(filePath, cfg); me.Err != nil {
-		ob.Opt.Log.Errorf("[PKG] %s", me.Err.Error())
+	if _, me.Diag.LoadErr = toml.DecodeFile(filePath, cfg); me.Diag.LoadErr != nil {
+		ob.Opt.Log.Errorf("[PKG] %s", me.Diag.LoadErr.Error())
 	} else {
 		var (
 			ok                 bool
@@ -59,8 +58,8 @@ func (me *Package) reload(kind, name, fullName, filePath string) {
 		)
 		if cfgPkg, ok = cfg["pkg"].(map[string]interface{}); ok {
 			me.Info.Title, me.Info.Desc, me.Info.Www = s(cfgPkg, "title"), s(cfgPkg, "desc"), s(cfgPkg, "www")
-			if req, _ := cfgPkg["require"].([]string); len(req) > 0 {
-				usl.StrAppendUniques(&me.Info.Require, req...)
+			if req, _ := cfgPkg["require"].([]interface{}); len(req) > 0 {
+				usl.StrAppendUniques(&me.Info.Require, usl.StrConvert(req, true)...)
 			}
 		}
 		if cfgDefault, ok = cfg["default"].(map[string]interface{}); ok {
