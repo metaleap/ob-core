@@ -40,12 +40,14 @@ func (me *Registry) reloadPackages(subDirPath string) {
 	allKinds, addsOrDels := map[string]bool{}, false
 	for key, pkg := range me.m {
 		if key != pkg.NameFull || !uio.FileExists(filepath.Join(pkgsDirPath, pkg.NameFull, me.fileName(pkg.Name, pkg.Kind))) {
+			addsOrDels = true
 			delete(me.m, key)
 		}
 	}
 	uio.WalkDirsIn(pkgsDirPath, func(pkgDirPath string) bool {
 		dirName := filepath.Base(pkgDirPath)
 		if !me.watched[pkgDirPath] {
+			addsOrDels = true
 			me.watched[pkgDirPath] = true
 			ob.Hive.WatchDualDir(func(dp string) { me.reloadPackages(filepath.Dir(dp)) }, false, "pkg", dirName)
 		}
@@ -67,11 +69,11 @@ func (me *Registry) reloadPackages(subDirPath string) {
 		return true
 	})
 	if addsOrDels {
-		me.refreshCachesAndPkgInfos(allKinds)
+		me.refreshCachesAndMeta(allKinds)
 	}
 }
 
-func (me *Registry) refreshCachesAndPkgInfos(allKinds map[string]bool) {
+func (me *Registry) refreshCachesAndMeta(allKinds map[string]bool) {
 	for kind, _ := range allKinds {
 		pkgs := Packages{}
 		for _, pkg := range me.m {

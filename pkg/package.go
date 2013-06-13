@@ -39,11 +39,12 @@ func newPackage() (me *Package) {
 	return
 }
 
-//	This may load from the primary dist .ob-pkg file, or just partial additions/overrides from cust
+//	This may load from the primary dist .ob-pkg file, or just partial additions/overrides from cust.
+//	But it's only called if .ob-pkg file (filePath) does exist.
 func (me *Package) reload(kind, name, fullName, filePath string) {
 	me.Dir, me.Kind, me.Name, me.NameFull = filepath.Dir(filePath), kind, name, fullName
 	cfg := map[string]interface{}{}
-	s := func(m map[string]interface{}, name string) (s string) {
+	str := func(m map[string]interface{}, name string) (s string) {
 		s, _ = m[name].(string)
 		return
 	}
@@ -57,7 +58,7 @@ func (me *Package) reload(kind, name, fullName, filePath string) {
 			val                interface{}
 		)
 		if cfgPkg, ok = cfg["pkg"].(map[string]interface{}); ok {
-			me.Info.Title, me.Info.Desc, me.Info.Www = s(cfgPkg, "title"), s(cfgPkg, "desc"), s(cfgPkg, "www")
+			me.Info.Title, me.Info.Desc, me.Info.Www = str(cfgPkg, "title"), str(cfgPkg, "desc"), str(cfgPkg, "www")
 			if req, _ := cfgPkg["require"].([]interface{}); len(req) > 0 {
 				usl.StrAppendUniques(&me.Info.Require, usl.StrConvert(req, true)...)
 			}

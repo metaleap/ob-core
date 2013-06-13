@@ -20,14 +20,16 @@ func (me Packages) Len() int { return len(me) }
 
 //	Implements sort.Interface.Less()
 func (me Packages) Less(i, j int) bool {
-	p1, p2 := me[i], me[j]
-	if usl.StrHas(p1.Info.Require, p2.NameFull) {
+	pi, pj := me[i], me[j]
+	//	If i requires j, than j<i
+	if usl.StrHas(pi.Info.Require, pj.NameFull) {
 		return false
 	}
-	if usl.StrHas(p2.Info.Require, p1.NameFull) {
+	//	If j requires i, than i<j
+	if usl.StrHas(pj.Info.Require, pi.NameFull) {
 		return true
 	}
-	return me[i].NameFull < me[j].NameFull
+	return pi.NameFull < pj.NameFull
 }
 
 //	Implements sort.Interface.Swap()
