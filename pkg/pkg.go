@@ -7,12 +7,19 @@ import (
 	usl "github.com/metaleap/go-util/slice"
 )
 
+//	Used by Package.Kind-specific imports to register their reload handlers with PkgCfgLoaders.
 type PkgCfgReloader func(pkg *Package)
 
+//	Used in Package.CfgRaw
 type PkgCfg map[string]interface{}
 
+//	Contains one PkgCfgReloader handler per package kind.
+//	When a Package gets (re)loaded, after populating its CfgRaw hash-maps,
+//	it calls the appropriate PkgCfgReloader associated with its Kind to
+//	notify it of its potentially new or changed PkgCfg settings.
 var PkgCfgLoaders = map[string]PkgCfgReloader{}
 
+//	A collection of *Package pointers
 type Packages []*Package
 
 //	Implements sort.Interface.Len()

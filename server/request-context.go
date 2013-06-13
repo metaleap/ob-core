@@ -38,6 +38,7 @@ func serveRequest(w http.ResponseWriter, r *http.Request) {
 
 //	Encapsulates and provides context for a (non-static) web request
 type RequestContext struct {
+	//	Context related to the current Page, if any.
 	obwebui.PageContext
 
 	//	The http.ResponseWriter for this RequestContext
@@ -46,7 +47,7 @@ type RequestContext struct {
 	//	The http.Request for this RequestContext
 	Req *http.Request
 
-	//	Defaults to Opt.Log
+	//	Defaults to ob.Log
 	Log ob.Logger
 
 	//	Not used in the default stand-alone implementation (cmd/ob-server).
@@ -57,13 +58,13 @@ type RequestContext struct {
 }
 
 func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
-	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log}
+	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Log}
 	me.PageContext.Init()
 	return
 }
 
+//	http://www.gorillatoolkit.org/pkg/context#Get
 func (me *RequestContext) Get(key interface{}) interface{} {
-	return key
 	return webctx.Get(me.Req, key)
 }
 
@@ -77,6 +78,7 @@ func (me *RequestContext) serveRequest() {
 	}
 }
 
+//	http://www.gorillatoolkit.org/pkg/context#Set
 func (me *RequestContext) Set(key, val interface{}) {
 	webctx.Set(me.Req, key, val)
 }

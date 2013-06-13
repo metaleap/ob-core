@@ -28,12 +28,19 @@ type HiveRoot struct {
 
 	fsWatcher *uio.Watcher
 
+	//	Paths to some well-known HiveRoot directories
 	Paths struct {
+		//	{hive}/logs
 		Logs string
 	}
 
+	//	Sub-hives
 	Subs struct {
-		Cust, Dist HiveSub
+		//	{hive}/dist/
+		Dist HiveSub
+
+		//	{hive}/cust/
+		Cust HiveSub
 	}
 }
 
@@ -53,11 +60,13 @@ func (me *HiveRoot) dispose() {
 	}
 }
 
-func (me *HiveRoot) FileExists(subRelPath ...string) bool {
-	return len(me.FilePath(subRelPath...)) > 0
+//	me.Subs.Dist.FileExists(subRelPath...) || me.Subs.Dist.FileExists(subRelPath...)
+func (me *HiveRoot) SubFileExists(subRelPath ...string) bool {
+	return me.Subs.Dist.FileExists(subRelPath...) || me.Subs.Dist.FileExists(subRelPath...)
 }
 
-func (me *HiveRoot) FilePath(subRelPath ...string) (filePath string) {
+//	Returns either me.Subs.Cust.FilePath(subRelPath ...) or me.Subs.Dist.FilePath(subRelPath ...)
+func (me *HiveRoot) SubFilePath(subRelPath ...string) (filePath string) {
 	if filePath = me.Subs.Cust.FilePath(subRelPath...); len(filePath) == 0 {
 		filePath = me.Subs.Dist.FilePath(subRelPath...)
 	}
@@ -103,6 +112,50 @@ func (_ *HiveRoot) IsHive(dir string) bool {
 func (me *HiveRoot) Path(relPath ...string) (fullFsPath string) {
 	if fullFsPath = filepath.Join(relPath...); len(me.Dir) > 0 {
 		fullFsPath = filepath.Join(me.Dir, fullFsPath)
+	}
+	return
+}
+
+func (me *HiveRoot) WalkAllDirs(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+	dp := me.Subs.Dist.DirPath(relPath...)
+	if len(dp) > 0 {
+		errs = append(errs, uio.WalkAllDirs(dp, visitor)...)
+	}
+	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
+		errs = append(errs, uio.WalkAllDirs(dp, visitor)...)
+	}
+	return
+}
+
+func (me *HiveRoot) WalkAllFiles(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+	dp := me.Subs.Dist.DirPath(relPath...)
+	if len(dp) > 0 {
+		errs = append(errs, uio.WalkAllFiles(dp, visitor)...)
+	}
+	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
+		errs = append(errs, uio.WalkAllFiles(dp, visitor)...)
+	}
+	return
+}
+
+func (me *HiveRoot) WalkDirsIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+	dp := me.Subs.Dist.DirPath(relPath...)
+	if len(dp) > 0 {
+		errs = append(errs, uio.WalkDirsIn(dp, visitor)...)
+	}
+	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
+		errs = append(errs, uio.WalkDirsIn(dp, visitor)...)
+	}
+	return
+}
+
+func (me *HiveRoot) WalkFilesIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+	dp := me.Subs.Dist.DirPath(relPath...)
+	if len(dp) > 0 {
+		errs = append(errs, uio.WalkFilesIn(dp, visitor)...)
+	}
+	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
+		errs = append(errs, uio.WalkFilesIn(dp, visitor)...)
 	}
 	return
 }

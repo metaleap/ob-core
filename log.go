@@ -27,12 +27,12 @@ type Logger interface {
 	Criticalf(format string, args ...interface{})
 }
 
-//	The canonical implementation of the Logger interface
+//	The canonical implementation of the Logger interface, using a standard log.Logger
 type ObLogger struct {
 	logger *log.Logger
 }
 
-//	Creates and returns a new ObLogger with the specified Out io.Writer
+//	Creates and returns a new ObLogger with the specified out io.Writer
 func NewLogger(out io.Writer) (me *ObLogger) {
 	me = &ObLogger{}
 	if out != nil {

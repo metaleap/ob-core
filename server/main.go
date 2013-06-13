@@ -44,7 +44,7 @@ func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent b
 			defer logFile.Close()
 			logger.Infof("LOG @ %s", logFilePath)
 			logger = ob.NewLogger(logFile)
-			ob.Opt.Log = logger
+			ob.Log = logger
 		}
 	}
 
@@ -59,7 +59,7 @@ func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent b
 			if r, err := http.NewRequest("GET", "/", nil); r != nil {
 				now := time.Now()
 				serveRequest(&w, r)
-				ob.Opt.Log.Infof("Warmup request served in %v", time.Now().Sub(now))
+				ob.Log.Infof("Warmup request served in %v", time.Now().Sub(now))
 			} else {
 				panic(err)
 			}
