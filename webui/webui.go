@@ -3,13 +3,7 @@ package obwebui
 import (
 	"fmt"
 	"io"
-
-	obpkg_webuilib "github.com/openbase/ob-core/pkg/webuilib"
 )
-
-type WebUi struct {
-	Libs []*obpkg_webuilib.PkgCfg
-}
 
 func errf(format string, args ...interface{}) error {
 	return fmt.Errorf(format, args...)

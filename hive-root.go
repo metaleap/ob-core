@@ -53,6 +53,10 @@ func (me *HiveRoot) dispose() {
 	}
 }
 
+func (me *HiveRoot) FileExists(subRelPath ...string) bool {
+	return len(me.FilePath(subRelPath...)) > 0
+}
+
 func (me *HiveRoot) FilePath(subRelPath ...string) (filePath string) {
 	if filePath = me.Subs.Cust.FilePath(subRelPath...); len(filePath) == 0 {
 		filePath = me.Subs.Dist.FilePath(subRelPath...)
@@ -103,9 +107,8 @@ func (me *HiveRoot) Path(relPath ...string) (fullFsPath string) {
 	return
 }
 
-func (me *HiveRoot) WatchDualDir(handler uio.WatcherHandler, runHandlerNow bool, subRelPath ...string) (err error) {
-	if err = me.fsWatcher.WatchDir(me.Subs.Dist.Path(subRelPath...), runHandlerNow, handler); err == nil {
-		err = me.fsWatcher.WatchDir(me.Subs.Cust.Path(subRelPath...), runHandlerNow, handler)
-	}
+func (me *HiveRoot) WatchDualDir(handler uio.WatcherHandler, runHandlerNow bool, subRelPath ...string) {
+	me.fsWatcher.WatchIn(me.Subs.Dist.Path(subRelPath...), "*", runHandlerNow, handler)
+	me.fsWatcher.WatchIn(me.Subs.Cust.Path(subRelPath...), "*", runHandlerNow, handler)
 	return
 }

@@ -1,9 +1,12 @@
 package obsrv
 
 import (
+	"net/http"
 	"os"
+	"time"
 
 	ugo "github.com/metaleap/go-util"
+	unet "github.com/metaleap/go-util/net"
 	ustr "github.com/metaleap/go-util/str"
 
 	ob "github.com/openbase/ob-core"
@@ -14,7 +17,7 @@ import (
 //	executable instead of using ob-server, but this isn't really intended.
 //
 //	(Do note, this function does run 'forever' and thus defers all cleanups.)
-func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent bool) (err error) {
+func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent bool, warmupRequestAfter time.Duration) (err error) {
 	//	pre-init
 	if len(hiveDir) == 0 {
 		hiveDir, _ = os.Getwd()
@@ -49,5 +52,18 @@ func Main(hiveDir, httpAddr, tlsCertFile, tlsKeyFile string, logToFile, silent b
 	proto := ugo.Ifs(len(tlsCertFile) > 0 && len(tlsKeyFile) > 0, "https", "http")
 	logger.Infof("LIVE @ %s://%s%s", proto, ugo.HostName(), ustr.StripSuffix(httpAddr, ":"+proto))
 	Init()
+	if warmupRequestAfter.Nanoseconds() > 0 {
+		go func() {
+			time.Sleep(warmupRequestAfter)
+			var w unet.ResponseBuffer
+			if r, err := http.NewRequest("GET", "/", nil); r != nil {
+				now := time.Now()
+				serveRequest(&w, r)
+				ob.Opt.Log.Infof("Warmup request served in %v", time.Now().Sub(now))
+			} else {
+				panic(err)
+			}
+		}()
+	}
 	return ListenAndServe(httpAddr, tlsCertFile, tlsKeyFile)
 }

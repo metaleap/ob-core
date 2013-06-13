@@ -21,66 +21,66 @@ func init() {
 
 type Registry struct {
 	sync.Mutex
-	m            map[string]*Package
-	cachedByKind map[string]Packages
-	watched      map[string]bool
+	initialBulkLoading bool
+	allPackages        map[string]*Package
+	cachedByKind       map[string]Packages
+	watched            map[string]bool
 }
 
 func (me *Registry) fileName(name, kind string) string {
 	return strf("%s.%s.ob-pkg", name, kind)
 }
 
-func (me *Registry) reloadPackages(subDirPath string) {
-	me.Lock()
-	defer me.Unlock()
-	pkgsDirPath := subDirPath
-	if filepath.Base(pkgsDirPath) != "pkg" {
-		pkgsDirPath = filepath.Dir(subDirPath)
+func (me *Registry) reloadPackage(pkgDirPath string) {
+	if !me.initialBulkLoading {
+		me.Lock()
+		defer me.Unlock()
 	}
-	allKinds, addsOrDels := map[string]bool{}, false
-	for key, pkg := range me.m {
-		if key != pkg.NameFull || !uio.FileExists(filepath.Join(pkgsDirPath, pkg.NameFull, me.fileName(pkg.Name, pkg.Kind))) {
+	addsOrDels, dirName := false, filepath.Base(pkgDirPath)
+	for key, pkg := range me.allPackages {
+		if key != pkg.NameFull || !ob.Hive.FileExists("pkg", pkg.NameFull, me.fileName(pkg.Name, pkg.Kind)) {
+			ob.Opt.Log.Warningf("[PKG] Removing '%s': package directory or file no longer exists or renamed", key)
 			addsOrDels = true
-			delete(me.m, key)
+			delete(me.allPackages, key)
 		}
 	}
-	uio.WalkDirsIn(pkgsDirPath, func(pkgDirPath string) bool {
-		dirName := filepath.Base(pkgDirPath)
+	if pos := strings.Index(dirName, "-"); pos > 0 && pos == strings.LastIndex(dirName, "-") {
 		if !me.watched[pkgDirPath] {
 			addsOrDels = true
 			me.watched[pkgDirPath] = true
-			ob.Hive.WatchDualDir(func(dp string) { me.reloadPackages(filepath.Dir(dp)) }, false, "pkg", dirName)
+			ob.Hive.WatchDualDir(func(dp string) { me.reloadPackage(filepath.Dir(dp)) }, false, "pkg", dirName)
 		}
-		if pos := strings.Index(dirName, "-"); pos > 0 && pos == strings.LastIndex(dirName, "-") {
-			kind, name := dirName[:pos], dirName[pos+1:]
-			if cfgFilePath := filepath.Join(pkgDirPath, me.fileName(name, kind)); uio.FileExists(cfgFilePath) {
-				allKinds[kind] = true
-				pkg := me.m[dirName]
-				if pkg == nil {
-					addsOrDels = true
-					pkg = newPackage()
-					me.m[dirName] = pkg
-				}
-				pkg.reload(kind, name, dirName, cfgFilePath)
+		kind, name := dirName[:pos], dirName[pos+1:]
+		if cfgFilePath := filepath.Join(pkgDirPath, me.fileName(name, kind)); uio.FileExists(cfgFilePath) {
+			ob.Opt.Log.Infof("[PKG] Loading '%s' from '%s'", dirName, cfgFilePath)
+			pkg := me.allPackages[dirName]
+			if pkg == nil {
+				addsOrDels, pkg = true, newPackage()
+				me.allPackages[dirName] = pkg
 			}
-		} else {
-			ob.Opt.Log.Warningf("[PKG] Skipping '%s': expected directory name format '{pkgkind}-{pkgname}'", pkgDirPath)
+			pkg.reload(kind, name, dirName, cfgFilePath)
 		}
-		return true
-	})
-	if addsOrDels {
-		me.refreshCachesAndMeta(allKinds)
+	} else {
+		ob.Opt.Log.Warningf("[PKG] Skipping '%s': expected directory name format '{pkgkind}-{pkgname}'", pkgDirPath)
+	}
+	if addsOrDels && !me.initialBulkLoading {
+		me.refreshCachesAndMeta()
 	}
 }
 
-func (me *Registry) refreshCachesAndMeta(allKinds map[string]bool) {
+func (me *Registry) refreshCachesAndMeta() {
+	allKinds := map[string]bool{}
+	for _, pkg := range me.allPackages {
+		allKinds[pkg.Kind] = true
+	}
+	me.cachedByKind = map[string]Packages{}
 	for kind, _ := range allKinds {
 		pkgs := Packages{}
-		for _, pkg := range me.m {
+		for _, pkg := range me.allPackages {
 			if pkg.Kind == kind {
 				pkgs = append(pkgs, pkg)
 				for _, req := range pkg.Info.Require {
-					if me.m[req] == nil {
+					if me.allPackages[req] == nil {
 						ob.Opt.Log.Errorf("[PKG] Bad dependency: '%s' requires '%s', which was not found.", pkg.NameFull, req)
 						pkg.Diag.BadDeps = append(pkg.Diag.BadDeps, req)
 					}
@@ -93,18 +93,44 @@ func (me *Registry) refreshCachesAndMeta(allKinds map[string]bool) {
 }
 
 func (me *Registry) ensureLoaded() {
-	var load bool
 	me.Lock()
-	if load = me.m == nil; load {
-		me.m = map[string]*Package{}
-	}
-	me.Unlock()
-	if load {
-		ob.Hive.WatchDualDir(me.reloadPackages, true, "pkg")
+	defer me.Unlock()
+	if loadNow := (me.allPackages == nil); loadNow {
+		me.allPackages = map[string]*Package{}
+		me.initialBulkLoading = true
+		ob.Hive.WatchDualDir(me.reloadPackage, true, "pkg")
+		me.refreshCachesAndMeta()
+		me.initialBulkLoading = false
 	}
 }
 
-func (me *Registry) AllOfKind(kind string) Packages {
+func (me *Registry) ByKind(kind string, deps []string) (all Packages) {
 	me.ensureLoaded()
-	return me.cachedByKind[kind]
+	if len(deps) == 0 {
+		all = me.cachedByKind[kind]
+	} else {
+		var byDep func(string)
+		m := map[string]bool{}
+		byDep = func(dep string) {
+			if pkg := me.allPackages[dep]; pkg != nil {
+				m[pkg.NameFull] = true
+				for _, d := range pkg.Info.Require {
+					byDep(d)
+				}
+			}
+		}
+		for _, d := range deps {
+			byDep(d)
+		}
+		all = make(Packages, 0, len(m))
+		for k, _ := range m {
+			all = append(all, me.allPackages[k])
+		}
+	}
+	return
+}
+
+func (me *Registry) ByName(kind, name string) *Package {
+	me.ensureLoaded()
+	return me.allPackages[strf("%s-%s", kind, name)]
 }

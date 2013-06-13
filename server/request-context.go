@@ -40,8 +40,6 @@ func serveRequest(w http.ResponseWriter, r *http.Request) {
 type RequestContext struct {
 	obwebui.PageContext
 
-	PageTemplate *obwebui.PageTemplate
-
 	//	The http.ResponseWriter for this RequestContext
 	Out http.ResponseWriter
 
@@ -60,7 +58,6 @@ type RequestContext struct {
 
 func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
 	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Opt.Log}
-	me.PageTemplate = obwebui.GetPageTemplate("default")
 	me.PageContext.Init()
 	return
 }
@@ -72,7 +69,7 @@ func (me *RequestContext) Get(key interface{}) interface{} {
 
 func (me *RequestContext) serveRequest() {
 	var w bytes.Buffer
-	err := me.PageTemplate.Execute(&w, me)
+	err := me.WebUi.SkinTemplate.Execute(&w, me)
 	if err == nil {
 		me.Out.Write(w.Bytes())
 	} else {
