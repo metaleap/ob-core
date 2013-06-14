@@ -17,7 +17,7 @@ var (
 	//	Provides access to the 'Hive-directory' used throughout the package.
 	//	The 'Hive' is the root directory with the 'dist' and 'cust' sub-directories,
 	//	which contain configuration files, static web-served files, "template schema"
-	//	files, package manifests and possibly data-base files depending on setup.
+	//	files, bundle manifests and possibly data-base files depending on setup.
 	Hive HiveRoot
 )
 

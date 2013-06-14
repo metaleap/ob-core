@@ -7,7 +7,7 @@ import (
 	webctx "github.com/gorilla/context"
 
 	ob "github.com/openbase/ob-core"
-	obpkg "github.com/openbase/ob-core/pkg"
+	obpkg "github.com/openbase/ob-core/bundle"
 	obwebui "github.com/openbase/ob-core/webui"
 )
 
@@ -54,7 +54,7 @@ type RequestContext struct {
 	//	May be used in sandboxed mode (eg. the GAE package uses it for the current appengine.Context)
 	Ctx interface{}
 
-	pkg *obpkg.Registry
+	bundles *obpkg.Registry
 }
 
 func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
