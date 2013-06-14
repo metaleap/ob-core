@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-	"time"
 
 	uio "github.com/metaleap/go-util/io"
 
@@ -14,12 +13,32 @@ import (
 )
 
 var (
-	//	The http.Server used to serve web requests
-	Http http.Server
-
 	//	Multi-plexing request router
 	Router *webmux.Router
+
+	//	Custom event handlers
+	On struct {
+		//	Request-related event handlers
+		Request struct {
+			//	Event handlers to be invoked before serving a web request (except static files)
+			Serving RequestContextEventHandlers
+
+			//	Event handlers to be invoked immediately after serving a web request (except static files)
+			Served RequestContextEventHandlers
+		}
+	}
 )
+
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	rc := newRequestContext(w, r)
+	for _, on := range On.Request.Serving {
+		on(rc)
+	}
+	rc.serveRequest()
+	for _, on := range On.Request.Served {
+		on(rc)
+	}
+}
 
 type dualStaticHandler struct {
 	distDir, custDir string
@@ -52,17 +71,5 @@ func Init() {
 	Router.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
 	dual = newDualStaticHandler(ob.Hive.Subs.Dist.Paths.Pkg, ob.Hive.Subs.Cust.Paths.Pkg)
 	Router.PathPrefix("/_pkg/").Handler(http.StripPrefix("/_pkg/", dual))
-	Router.PathPrefix("/").HandlerFunc(serveRequest)
-	Http.Handler = Router
-	Http.ReadTimeout = 2 * time.Minute
-}
-
-//	Starts listening to and serving web requests.
-//	Uses Transport Layer Security only if both tls arguments are specified.
-func ListenAndServe(addr, tlsCertFile, tlsKeyFile string) (err error) {
-	Http.Addr = addr
-	if len(tlsCertFile) > 0 && len(tlsKeyFile) > 0 {
-		return Http.ListenAndServeTLS(tlsCertFile, tlsKeyFile)
-	}
-	return Http.ListenAndServe()
+	Router.PathPrefix("/").HandlerFunc(defaultHandler)
 }

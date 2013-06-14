@@ -11,31 +11,6 @@ import (
 	obwebui "github.com/openbase/ob-core/webui"
 )
 
-var (
-	//	Custom event handlers
-	On struct {
-		//	Request-related event handlers
-		Request struct {
-			//	Event handlers to be invoked before serving a web request (except static files)
-			Serving RequestContextEventHandlers
-
-			//	Event handlers to be invoked immediately after serving a web request (except static files)
-			Served RequestContextEventHandlers
-		}
-	}
-)
-
-func serveRequest(w http.ResponseWriter, r *http.Request) {
-	rc := newRequestContext(w, r)
-	for _, on := range On.Request.Serving {
-		on(rc)
-	}
-	rc.serveRequest()
-	for _, on := range On.Request.Served {
-		on(rc)
-	}
-}
-
 //	Encapsulates and provides context for a (non-static) web request
 type RequestContext struct {
 	//	Context related to the current Page, if any.
