@@ -27,10 +27,9 @@ type Opt struct {
 	//	Set to true to suppress any and all writes to "standard-output"
 	Silent bool
 
-	//	If not 0, schedules a single emulated "GET /"
-	//	"warm-up request" right from within this process,
-	//	n Duration after HTTP serving was initiated.
-	//	(To be useful, this should probably be at least 50-100ms and no more than 1s.)
+	//	If not 0, schedules a single emulated "GET /" warm-up "request" right
+	//	from within this process, n Duration after HTTP-serving was initiated.
+	//	(To be useful at all, this should probably be between 50-100ms and 1s.)
 	WarmupRequestAfter time.Duration
 
 	//	HTTPS via Transport Layer Security is supported only when both a

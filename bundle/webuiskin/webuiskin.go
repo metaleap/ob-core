@@ -23,7 +23,7 @@ func reloadBundleCfg(bundle *obpkg.Bundle) {
 //	Represents the Bundle.Cfg of a Bundle of Kind "webuiskin"
 type BundleCfg struct {
 	//	A HiveSub-relative directory path for the template files of this webuiskin.
-	//	For example, for a BundleCfg with name "fluid", this would be:
+	//	For example, for a BundleCfg with Name "fluid", this would be:
 	//	pkg/webuiskin-fluid/template
 	SubRelTemplateDirPath string
 

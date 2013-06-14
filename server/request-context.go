@@ -11,6 +11,17 @@ import (
 	obwebui "github.com/openbase/ob-core/webui"
 )
 
+//	A function that accepts a *RequestContext
+type RequestContextEventHandler func(*RequestContext)
+
+//	A collection of RequestContextEventHandler function-values
+type RequestContextEventHandlers []RequestContextEventHandler
+
+//	Adds the specified eventHandlers to me
+func (me *RequestContextEventHandlers) Add(eventHandlers ...RequestContextEventHandler) {
+	*me = append(*me, eventHandlers...)
+}
+
 //	Encapsulates and provides context for a (non-static) web request
 type RequestContext struct {
 	//	Context related to the current Page, if any.
@@ -56,15 +67,4 @@ func (me *RequestContext) serveRequest() {
 //	http://www.gorillatoolkit.org/pkg/context#Set
 func (me *RequestContext) Set(key, val interface{}) {
 	webctx.Set(me.Req, key, val)
-}
-
-//	A function that accepts a *RequestContext
-type RequestContextEventHandler func(*RequestContext)
-
-//	A collection of RequestContextEventHandler function-values
-type RequestContextEventHandlers []RequestContextEventHandler
-
-//	Adds the specified eventHandlers to me
-func (me *RequestContextEventHandlers) Add(eventHandlers ...RequestContextEventHandler) {
-	*me = append(*me, eventHandlers...)
 }

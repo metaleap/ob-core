@@ -27,6 +27,19 @@ var (
 	}
 )
 
+//	Initializes the package for serving web requests. To be called after ob.Init()
+func Init() {
+	Router = webmux.NewRouter()
+	Router.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", http.FileServer(http.Dir(ob.Hive.Subs.Dist.Paths.ClientPub))))
+	Router.PathPrefix("/_cust/").Handler(http.StripPrefix("/_cust/", http.FileServer(http.Dir(ob.Hive.Subs.Cust.Paths.ClientPub))))
+	dual := newHiveSubsStaticHandler(ob.Hive.Subs.Dist.Paths.ClientPub, ob.Hive.Subs.Cust.Paths.ClientPub)
+	Router.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", dual))
+	Router.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
+	dual = newHiveSubsStaticHandler(ob.Hive.Subs.Dist.Paths.Pkg, ob.Hive.Subs.Cust.Paths.Pkg)
+	Router.PathPrefix("/_pkg/").Handler(http.StripPrefix("/_pkg/", dual))
+	Router.PathPrefix("/").HandlerFunc(defaultHandler)
+}
+
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	rc := newRequestContext(w, r)
 	for _, on := range On.Request.Serving {
@@ -59,17 +72,4 @@ func (me *hiveSubsStaticHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	} else {
 		me.distSrv.ServeHTTP(w, r)
 	}
-}
-
-//	Initializes the package for serving web requests
-func Init() {
-	Router = webmux.NewRouter()
-	Router.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", http.FileServer(http.Dir(ob.Hive.Subs.Dist.Paths.ClientPub))))
-	Router.PathPrefix("/_cust/").Handler(http.StripPrefix("/_cust/", http.FileServer(http.Dir(ob.Hive.Subs.Cust.Paths.ClientPub))))
-	dual := newHiveSubsStaticHandler(ob.Hive.Subs.Dist.Paths.ClientPub, ob.Hive.Subs.Cust.Paths.ClientPub)
-	Router.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", dual))
-	Router.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
-	dual = newHiveSubsStaticHandler(ob.Hive.Subs.Dist.Paths.Pkg, ob.Hive.Subs.Cust.Paths.Pkg)
-	Router.PathPrefix("/_pkg/").Handler(http.StripPrefix("/_pkg/", dual))
-	Router.PathPrefix("/").HandlerFunc(defaultHandler)
 }

@@ -24,7 +24,7 @@ func main() {
 		HttpAddr:           *addr,
 		LogToFile:          *logToFile,
 		Silent:             *silent,
-		WarmupRequestAfter: 1 * time.Second,
+		WarmupRequestAfter: 100 * time.Millisecond,
 	}
 	opt.TLS.CertFile, opt.TLS.KeyFile = *tlsCertFile, *tlsKeyFile
 
