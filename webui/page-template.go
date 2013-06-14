@@ -46,9 +46,9 @@ func newPageTemplate(subRelDirPath string) (me *PageTemplate) {
 func (me *PageTemplate) load() {
 	loader := func(fullPath string) {
 		dirPath := filepath.Dir(fullPath)
-		fileNames := []string{filepath.Join(dirPath, "main.html")}
+		fileNames := []string{filepath.Join(dirPath, "main.ob-tmpl")}
 		uio.WalkFilesIn(dirPath, func(fullPath string) bool {
-			if filepath.Base(fullPath) != "main.html" {
+			if filepath.Base(fullPath) != "main.ob-tmpl" {
 				fileNames = append(fileNames, fullPath)
 			}
 			return true
@@ -60,5 +60,5 @@ func (me *PageTemplate) load() {
 		}
 		return
 	}
-	ob.Hive.WatchDualDir(loader, true, me.subRelDirPath)
+	ob.Hive.Subs.WatchIn(loader, true, me.subRelDirPath)
 }

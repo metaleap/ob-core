@@ -46,7 +46,7 @@ func (me *Registry) reloadBundle(bundleDirPath string) {
 	}
 	addsOrDels, dirName := false, filepath.Base(bundleDirPath)
 	for key, bundle := range me.allBundles {
-		if key != bundle.NameFull || !ob.Hive.SubFileExists("pkg", bundle.NameFull, me.fileName(bundle.Name, bundle.Kind)) {
+		if key != bundle.NameFull || !ob.Hive.Subs.FileExists("pkg", bundle.NameFull, me.fileName(bundle.Name, bundle.Kind)) {
 			ob.Log.Warningf("[BUNDLE] Removing '%s': bundle directory or file no longer exists or renamed", key)
 			addsOrDels = true
 			delete(me.allBundles, key)
@@ -56,7 +56,7 @@ func (me *Registry) reloadBundle(bundleDirPath string) {
 		if !me.watched[bundleDirPath] {
 			addsOrDels = true
 			me.watched[bundleDirPath] = true
-			ob.Hive.WatchDualDir(func(dp string) { me.reloadBundle(filepath.Dir(dp)) }, false, "pkg", dirName)
+			ob.Hive.Subs.WatchIn(func(dp string) { me.reloadBundle(filepath.Dir(dp)) }, false, "pkg", dirName)
 		}
 		kind, name := dirName[:pos], dirName[pos+1:]
 		if cfgFilePath := filepath.Join(bundleDirPath, me.fileName(name, kind)); uio.FileExists(cfgFilePath) {
@@ -106,7 +106,7 @@ func (me *Registry) ensureLoaded() {
 	if loadNow := (me.allBundles == nil); loadNow {
 		me.allBundles = map[string]*Bundle{}
 		me.initialBulkLoading = true
-		ob.Hive.WatchDualDir(me.reloadBundle, true, "pkg")
+		ob.Hive.Subs.WatchIn(me.reloadBundle, true, "pkg")
 		me.refreshCachesAndMeta()
 		me.initialBulkLoading = false
 	}

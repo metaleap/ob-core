@@ -5,8 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	uio "github.com/metaleap/go-util/io"
-
 	webmux "github.com/gorilla/mux"
 
 	ob "github.com/openbase/ob-core"
@@ -40,21 +38,23 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type dualStaticHandler struct {
-	distDir, custDir string
+type hiveSubsStaticHandler struct {
 	distSrv, custSrv http.Handler
 }
 
-func newDualStaticHandler(distDir, custDir string) (me *dualStaticHandler) {
-	me = &dualStaticHandler{distDir: distDir, custDir: custDir}
-	me.distSrv, me.custSrv = http.FileServer(http.Dir(distDir)), http.FileServer(http.Dir(custDir))
+func newHiveSubsStaticHandler(distDir, custDir string) (me *hiveSubsStaticHandler) {
+	me = &hiveSubsStaticHandler{
+		distSrv: http.FileServer(http.Dir(distDir)),
+		custSrv: http.FileServer(http.Dir(custDir)),
+	}
 	return
 }
 
-func (me *dualStaticHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(filepath.Ext(r.URL.Path), ".ob-") {
+func (me *hiveSubsStaticHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ext, dir := filepath.Ext(r.URL.Path), filepath.Base(filepath.Dir(r.URL.Path))
+	if strings.HasPrefix(ext, ".ob-") || (strings.HasPrefix(dir, "__") && strings.HasSuffix(dir, "__")) {
 		http.Error(w, "Forbidden", 403)
-	} else if uio.FileExists(filepath.Join(me.custDir, r.URL.Path)) {
+	} else if ob.Hive.Subs.Cust.FileExists(r.URL.Path) {
 		me.custSrv.ServeHTTP(w, r)
 	} else {
 		me.distSrv.ServeHTTP(w, r)
@@ -66,10 +66,10 @@ func Init() {
 	Router = webmux.NewRouter()
 	Router.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", http.FileServer(http.Dir(ob.Hive.Subs.Dist.Paths.ClientPub))))
 	Router.PathPrefix("/_cust/").Handler(http.StripPrefix("/_cust/", http.FileServer(http.Dir(ob.Hive.Subs.Cust.Paths.ClientPub))))
-	dual := newDualStaticHandler(ob.Hive.Subs.Dist.Paths.ClientPub, ob.Hive.Subs.Cust.Paths.ClientPub)
+	dual := newHiveSubsStaticHandler(ob.Hive.Subs.Dist.Paths.ClientPub, ob.Hive.Subs.Cust.Paths.ClientPub)
 	Router.PathPrefix("/_static/").Handler(http.StripPrefix("/_static/", dual))
 	Router.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
-	dual = newDualStaticHandler(ob.Hive.Subs.Dist.Paths.Pkg, ob.Hive.Subs.Cust.Paths.Pkg)
+	dual = newHiveSubsStaticHandler(ob.Hive.Subs.Dist.Paths.Pkg, ob.Hive.Subs.Cust.Paths.Pkg)
 	Router.PathPrefix("/_pkg/").Handler(http.StripPrefix("/_pkg/", dual))
 	Router.PathPrefix("/").HandlerFunc(defaultHandler)
 }

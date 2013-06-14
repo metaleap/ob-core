@@ -54,7 +54,7 @@ func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err e
 	ob.Opt.Server = true
 	if len(hiveDir) == 0 {
 		hiveDir, _ = os.Getwd()
-		hiveDir = ob.Hive.GuessDir(hiveDir)
+		hiveDir = ob.Hive.GuessHiveRootDir(hiveDir)
 	}
 
 	//	init

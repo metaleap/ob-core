@@ -35,13 +35,7 @@ type HiveRoot struct {
 	}
 
 	//	Sub-hives
-	Subs struct {
-		//	{hive}/dist/
-		Dist HiveSub
-
-		//	{hive}/cust/
-		Cust HiveSub
-	}
+	Subs HiveSubs
 }
 
 //	Creates a new log file at: {me.Dir}/logs/{date-time}.log
@@ -60,22 +54,9 @@ func (me *HiveRoot) dispose() {
 	}
 }
 
-//	me.Subs.Dist.FileExists(subRelPath...) || me.Subs.Dist.FileExists(subRelPath...)
-func (me *HiveRoot) SubFileExists(subRelPath ...string) bool {
-	return me.Subs.Dist.FileExists(subRelPath...) || me.Subs.Dist.FileExists(subRelPath...)
-}
-
-//	Returns either me.Subs.Cust.FilePath(subRelPath ...) or me.Subs.Dist.FilePath(subRelPath ...)
-func (me *HiveRoot) SubFilePath(subRelPath ...string) (filePath string) {
-	if filePath = me.Subs.Cust.FilePath(subRelPath...); len(filePath) == 0 {
-		filePath = me.Subs.Dist.FilePath(subRelPath...)
-	}
-	return
-}
-
 //	Returns userSpecified if that is a valid Hive-directory path as per HiveRoot.IsHive(),
 //	else returns the value of the OBHIVE environment variable (regardless of path validity).
-func (me *HiveRoot) GuessDir(userSpecified string) (guess string) {
+func (me *HiveRoot) GuessHiveRootDir(userSpecified string) (guess string) {
 	if guess = userSpecified; !me.IsHive(guess) {
 		guess = os.Getenv(ENV_OBHIVE)
 	}
@@ -86,8 +67,7 @@ func (me *HiveRoot) GuessDir(userSpecified string) (guess string) {
 //	Then initializes me.Subs and me.Paths based on me.Dir.
 func (me *HiveRoot) Init(dir string) {
 	me.Dir = dir
-	me.Subs.Cust.init(me, "cust")
-	me.Subs.Dist.init(me, "dist")
+	me.Subs.init(me)
 	p := &me.Paths
 	p.Logs = me.Path("logs")
 }
@@ -113,55 +93,5 @@ func (me *HiveRoot) Path(relPath ...string) (fullFsPath string) {
 	if fullFsPath = filepath.Join(relPath...); len(me.Dir) > 0 {
 		fullFsPath = filepath.Join(me.Dir, fullFsPath)
 	}
-	return
-}
-
-func (me *HiveRoot) WalkAllDirs(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
-	dp := me.Subs.Dist.DirPath(relPath...)
-	if len(dp) > 0 {
-		errs = append(errs, uio.WalkAllDirs(dp, visitor)...)
-	}
-	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkAllDirs(dp, visitor)...)
-	}
-	return
-}
-
-func (me *HiveRoot) WalkAllFiles(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
-	dp := me.Subs.Dist.DirPath(relPath...)
-	if len(dp) > 0 {
-		errs = append(errs, uio.WalkAllFiles(dp, visitor)...)
-	}
-	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkAllFiles(dp, visitor)...)
-	}
-	return
-}
-
-func (me *HiveRoot) WalkDirsIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
-	dp := me.Subs.Dist.DirPath(relPath...)
-	if len(dp) > 0 {
-		errs = append(errs, uio.WalkDirsIn(dp, visitor)...)
-	}
-	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkDirsIn(dp, visitor)...)
-	}
-	return
-}
-
-func (me *HiveRoot) WalkFilesIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
-	dp := me.Subs.Dist.DirPath(relPath...)
-	if len(dp) > 0 {
-		errs = append(errs, uio.WalkFilesIn(dp, visitor)...)
-	}
-	if dp = me.Subs.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkFilesIn(dp, visitor)...)
-	}
-	return
-}
-
-func (me *HiveRoot) WatchDualDir(handler uio.WatcherHandler, runHandlerNow bool, subRelPath ...string) {
-	me.fsWatcher.WatchIn(me.Subs.Dist.Path(subRelPath...), "*", runHandlerNow, handler)
-	me.fsWatcher.WatchIn(me.Subs.Cust.Path(subRelPath...), "*", runHandlerNow, handler)
 	return
 }

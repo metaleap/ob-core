@@ -27,7 +27,7 @@ func reloadBundleCfg(bundle *obpkg.Bundle) {
 	js, _ := bundle.CfgRaw.Default["js"].([]interface{})
 	cfg.Js = usl.StrConvert(js, true)
 	cfg.Versions = []string{}
-	ob.Hive.WalkDirsIn(func(dirPath string) bool {
+	ob.Hive.Subs.WalkDirsIn(func(dirPath string) bool {
 		usl.StrAppendUnique(&cfg.Versions, filepath.Base(dirPath))
 		return true
 	}, "pkg", bundle.NameFull)
