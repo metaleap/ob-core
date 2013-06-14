@@ -142,6 +142,7 @@ func (me *Registry) ByKind(kind string, deps []string) (all Packages) {
 				all = append(all, me.allPackages[k])
 			}
 		}
+		sort.Sort(all)
 	}
 	return
 }
