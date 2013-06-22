@@ -1,3 +1,4 @@
+// Stand-alone server
 package main
 
 import (

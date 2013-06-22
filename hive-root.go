@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	uio "github.com/metaleap/go-util/io"
+	"github.com/go-utils/uio"
 )
 
 const (

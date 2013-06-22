@@ -3,7 +3,7 @@ package obpkg
 import (
 	"github.com/go-forks/toml"
 
-	usl "github.com/metaleap/go-util/slice"
+	"github.com/go-utils/uslice"
 
 	ob "github.com/openbase/ob-core"
 )
@@ -85,7 +85,7 @@ func (me *Bundle) reload(kind, name, fullName, filePath string) {
 		if cfg, ok = config["bundle"].(map[string]interface{}); ok {
 			me.Info.Title, me.Info.Desc, me.Info.Www = str(cfg, "title"), str(cfg, "desc"), str(cfg, "www")
 			if req, _ := cfg["require"].([]interface{}); len(req) > 0 {
-				usl.StrAppendUniques(&me.Info.Require, usl.StrConvert(req, true)...)
+				uslice.StrAppendUniques(&me.Info.Require, uslice.StrConvert(req, true)...)
 			}
 		}
 		if cfg, ok = config["default"].(map[string]interface{}); ok {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	usl "github.com/metaleap/go-util/slice"
-	usort "github.com/metaleap/go-util/slice/sort"
+	usl "github.com/go-utils/uslice"
+	usort "github.com/go-utils/uslice/sort"
 
 	ob "github.com/openbase/ob-core"
 	obpkg "github.com/openbase/ob-core/bundle"

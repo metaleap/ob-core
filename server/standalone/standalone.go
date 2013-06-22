@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	ugo "github.com/metaleap/go-util"
-	unet "github.com/metaleap/go-util/net"
+	"github.com/go-utils/ugo"
+	"github.com/go-utils/unet"
 
 	ob "github.com/openbase/ob-core"
 	obsrv "github.com/openbase/ob-core/server"

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	uio "github.com/metaleap/go-util/io"
+	"github.com/go-utils/uio"
 
 	ob "github.com/openbase/ob-core"
 )

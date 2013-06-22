@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	usl "github.com/metaleap/go-util/slice"
+	"github.com/go-utils/uslice"
 )
 
 //	Used by Bundle.Kind-specific imports to register their reload handlers with BundleCfgLoaders.
@@ -29,11 +29,11 @@ func (me Bundles) Len() int { return len(me) }
 func (me Bundles) Less(i, j int) bool {
 	pi, pj := me[i], me[j]
 	//	If i requires j, than j<i
-	if usl.StrHas(pi.Info.Require, pj.NameFull) {
+	if uslice.StrHas(pi.Info.Require, pj.NameFull) {
 		return false
 	}
 	//	If j requires i, than i<j
-	if usl.StrHas(pj.Info.Require, pi.NameFull) {
+	if uslice.StrHas(pj.Info.Require, pi.NameFull) {
 		return true
 	}
 	return pi.NameFull < pj.NameFull
