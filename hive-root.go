@@ -84,7 +84,7 @@ func (me *HiveRoot) init(dir string) (err error) {
 
 //	Returns true if the specified directory path points to a valid Hive-directory.
 func (_ *HiveRoot) IsHive(dir string) bool {
-	return uio.DirsFilesExist(dir, "cust", "dist")
+	return uio.DirsOrFilesExistIn(dir, "cust", "dist")
 }
 
 //	Returns a cleaned, me.Dir-joined full path for the specified Hive-relative path segments.
