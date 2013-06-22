@@ -5,6 +5,11 @@ import (
 	"log"
 )
 
+var (
+	//	Set via Init(), never nil (even if logging is disabled)
+	Log Logger
+)
+
 //	An interface for log output. ObLogger provides the canonical implementation
 type Logger interface {
 	// Debugf formats its arguments according to the format, analogous to fmt.Printf,

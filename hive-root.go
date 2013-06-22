@@ -3,6 +3,7 @@ package obcore
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/go-utils/uio"
 )
@@ -41,7 +42,8 @@ type HiveRoot struct {
 //	Creates a new log file at: {me.Dir}/logs/{date-time}.log
 func (me *HiveRoot) CreateLogFile() (fullPath string, newOutFile *os.File, err error) {
 	if err = uio.EnsureDirExists(me.Paths.Logs); err == nil {
-		fullPath = filepath.Join(me.Paths.Logs, strf("%s__%v.log", Opt.initTime.Format("2006-01-02_15-04-05"), Opt.initTime.UnixNano()))
+		now := time.Now()
+		fullPath = filepath.Join(me.Paths.Logs, strf("%s__%v.log", now.Format("2006-01-02_15-04-05"), now.UnixNano()))
 		newOutFile, err = os.Create(fullPath)
 	}
 	return

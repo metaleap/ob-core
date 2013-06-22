@@ -2,7 +2,6 @@ package obcore
 
 import (
 	"path/filepath"
-	"time"
 )
 
 const (
@@ -11,9 +10,6 @@ const (
 )
 
 var (
-	//	Set via Init(), never nil (even if logging is disabled)
-	Log Logger
-
 	//	Runtime options
 	Opt struct {
 
@@ -26,8 +22,6 @@ var (
 		//	(If true, much additional logic is executed and server-related resources allocated that
 		//	are unneeded when importing this package in a "server-side but server-less client" scenario.)
 		Server bool
-
-		initTime time.Time
 	}
 )
 
@@ -42,7 +36,6 @@ func Dispose() {
 //	In any event, Init() doesn't log the err being returned, so be sure to check it.
 //	If err is not nil, this package is not in a usable state and must not be used.
 func Init(hiveDirPath string, logger Logger) (err error) {
-	Opt.initTime = time.Now()
 	if Log = logger; Log == nil {
 		Log = NewLogger(nil)
 	}

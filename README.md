@@ -21,6 +21,24 @@ const (
 )
 ```
 
+```go
+var (
+	//	Runtime options
+	Opt struct {
+
+		//	Set this to true before calling Init() if the runtime is a sandboxed environment (such
+		//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)
+		Sandboxed bool
+
+		//	Set to true before Init() in cmd/ob-server/main.go.
+		//	Should remain false in practically all other scenarios.
+		//	(If true, much additional logic is executed and server-related resources allocated that
+		//	are unneeded when importing this package in a "server-side but server-less client" scenario.)
+		Server bool
+	}
+)
+```
+
 #### func  Dispose
 
 ```go
@@ -293,20 +311,6 @@ An interface for log output. ObLogger provides the canonical implementation
 var (
 	//	Set via Init(), never nil (even if logging is disabled)
 	Log Logger
-
-	//	Runtime options
-	Opt struct {
-
-		//	Set this to true before calling Init() if the runtime is a sandboxed environment (such
-		//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)
-		Sandboxed bool
-
-		//	Set to true before Init() in cmd/ob-server/main.go.
-		//	Should remain false in practically all other scenarios.
-		//	(If true, much additional logic is executed and server-related resources allocated that
-		//	are unneeded when importing this package in a "server-side but server-less client" scenario.)
-		Server bool
-	}
 )
 ```
 
