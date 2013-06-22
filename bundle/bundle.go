@@ -1,7 +1,7 @@
 package obpkg
 
 import (
-	"github.com/goforks/toml"
+	"github.com/go-forks/toml"
 
 	usl "github.com/metaleap/go-util/slice"
 
