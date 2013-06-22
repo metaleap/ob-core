@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/go-utils/uio"
+	"github.com/go-utils/ufs"
 
 	ob "github.com/openbase/ob-core"
 )
@@ -59,7 +59,7 @@ func (me *Registry) reloadBundle(bundleDirPath string) {
 			ob.Hive.Subs.WatchIn(func(dp string) { me.reloadBundle(filepath.Dir(dp)) }, false, "pkg", dirName)
 		}
 		kind, name := dirName[:pos], dirName[pos+1:]
-		if cfgFilePath := filepath.Join(bundleDirPath, me.fileName(name, kind)); uio.FileExists(cfgFilePath) {
+		if cfgFilePath := filepath.Join(bundleDirPath, me.fileName(name, kind)); ufs.FileExists(cfgFilePath) {
 			ob.Log.Infof("[BUNDLE] Loading '%s' from '%s'", dirName, cfgFilePath)
 			bundle := me.allBundles[dirName]
 			if bundle == nil {

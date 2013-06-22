@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/go-utils/uio"
+	"github.com/go-utils/ufs"
 
 	ob "github.com/openbase/ob-core"
 )
@@ -47,7 +47,7 @@ func (me *PageTemplate) load() {
 	loader := func(fullPath string) {
 		dirPath := filepath.Dir(fullPath)
 		fileNames := []string{filepath.Join(dirPath, "main.ob-tmpl")}
-		uio.WalkFilesIn(dirPath, func(fullPath string) bool {
+		ufs.WalkFilesIn(dirPath, func(fullPath string) bool {
 			if filepath.Base(fullPath) != "main.ob-tmpl" {
 				fileNames = append(fileNames, fullPath)
 			}

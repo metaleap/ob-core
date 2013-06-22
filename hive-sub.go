@@ -3,7 +3,7 @@ package obcore
 import (
 	"io/ioutil"
 
-	"github.com/go-utils/uio"
+	"github.com/go-utils/ufs"
 )
 
 //	Represents either the dist or the cust directory in a hive directory
@@ -32,7 +32,7 @@ func (me *HiveSub) init(root *HiveRoot, name string) {
 
 //	Returns whether the specified {hive}/{sub}-relative directory exists
 func (me *HiveSub) DirExists(relPath ...string) bool {
-	return uio.DirExists(me.Path(relPath...))
+	return ufs.DirExists(me.Path(relPath...))
 }
 
 //	Returns a {hive}/{sub}-joined representation of the specified
@@ -46,7 +46,7 @@ func (me *HiveSub) DirPath(relPath ...string) (dirPath string) {
 
 //	Returns whether the specified {hive}/{sub}-relative file exists
 func (me *HiveSub) FileExists(relPath ...string) bool {
-	return uio.FileExists(me.Path(relPath...))
+	return ufs.FileExists(me.Path(relPath...))
 }
 
 //	Returns a {hive}/{sub}-joined representation of the specified

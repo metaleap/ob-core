@@ -12,7 +12,6 @@ const (
 var (
 	//	Runtime options
 	Opt struct {
-
 		//	Set this to true before calling Init() if the runtime is a sandboxed environment (such
 		//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)
 		Sandboxed bool

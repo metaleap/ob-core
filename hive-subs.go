@@ -1,7 +1,7 @@
 package obcore
 
 import (
-	"github.com/go-utils/uio"
+	"github.com/go-utils/ufs"
 )
 
 //	Used for Hive.Subs
@@ -34,51 +34,51 @@ func (me *HiveSubs) FilePath(subRelPath ...string) (filePath string) {
 	return
 }
 
-func (me *HiveSubs) WalkAllDirs(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+func (me *HiveSubs) WalkAllDirs(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
-		errs = append(errs, uio.WalkAllDirs(dp, visitor)...)
+		errs = append(errs, ufs.WalkAllDirs(dp, visitor)...)
 	}
 	if dp = me.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkAllDirs(dp, visitor)...)
+		errs = append(errs, ufs.WalkAllDirs(dp, visitor)...)
 	}
 	return
 }
 
-func (me *HiveSubs) WalkAllFiles(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+func (me *HiveSubs) WalkAllFiles(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
-		errs = append(errs, uio.WalkAllFiles(dp, visitor)...)
+		errs = append(errs, ufs.WalkAllFiles(dp, visitor)...)
 	}
 	if dp = me.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkAllFiles(dp, visitor)...)
+		errs = append(errs, ufs.WalkAllFiles(dp, visitor)...)
 	}
 	return
 }
 
-func (me *HiveSubs) WalkDirsIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+func (me *HiveSubs) WalkDirsIn(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
-		errs = append(errs, uio.WalkDirsIn(dp, visitor)...)
+		errs = append(errs, ufs.WalkDirsIn(dp, visitor)...)
 	}
 	if dp = me.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkDirsIn(dp, visitor)...)
+		errs = append(errs, ufs.WalkDirsIn(dp, visitor)...)
 	}
 	return
 }
 
-func (me *HiveSubs) WalkFilesIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error) {
+func (me *HiveSubs) WalkFilesIn(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
-		errs = append(errs, uio.WalkFilesIn(dp, visitor)...)
+		errs = append(errs, ufs.WalkFilesIn(dp, visitor)...)
 	}
 	if dp = me.Cust.DirPath(relPath...); len(dp) > 0 {
-		errs = append(errs, uio.WalkFilesIn(dp, visitor)...)
+		errs = append(errs, ufs.WalkFilesIn(dp, visitor)...)
 	}
 	return
 }
 
-func (me *HiveSubs) WatchIn(handler uio.WatcherHandler, runHandlerNow bool, subRelPath ...string) {
+func (me *HiveSubs) WatchIn(handler ufs.WatcherHandler, runHandlerNow bool, subRelPath ...string) {
 	me.root.fsWatcher.WatchIn(me.Dist.Path(subRelPath...), "*", runHandlerNow, handler)
 	me.root.fsWatcher.WatchIn(me.Cust.Path(subRelPath...), "*", runHandlerNow, handler)
 	return

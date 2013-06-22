@@ -25,7 +25,6 @@ const (
 var (
 	//	Runtime options
 	Opt struct {
-
 		//	Set this to true before calling Init() if the runtime is a sandboxed environment (such
 		//	as Google App Engine) with security restrictions (no syscall, no unsafe, no file-writes)
 		Sandboxed bool
@@ -227,31 +226,31 @@ Returns either me.Cust.FilePath(subRelPath ...) or me.Dist.FilePath(subRelPath
 #### func (*HiveSubs) WalkAllDirs
 
 ```go
-func (me *HiveSubs) WalkAllDirs(visitor uio.WalkerVisitor, relPath ...string) (errs []error)
+func (me *HiveSubs) WalkAllDirs(visitor ufs.WalkerVisitor, relPath ...string) (errs []error)
 ```
 
 #### func (*HiveSubs) WalkAllFiles
 
 ```go
-func (me *HiveSubs) WalkAllFiles(visitor uio.WalkerVisitor, relPath ...string) (errs []error)
+func (me *HiveSubs) WalkAllFiles(visitor ufs.WalkerVisitor, relPath ...string) (errs []error)
 ```
 
 #### func (*HiveSubs) WalkDirsIn
 
 ```go
-func (me *HiveSubs) WalkDirsIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error)
+func (me *HiveSubs) WalkDirsIn(visitor ufs.WalkerVisitor, relPath ...string) (errs []error)
 ```
 
 #### func (*HiveSubs) WalkFilesIn
 
 ```go
-func (me *HiveSubs) WalkFilesIn(visitor uio.WalkerVisitor, relPath ...string) (errs []error)
+func (me *HiveSubs) WalkFilesIn(visitor ufs.WalkerVisitor, relPath ...string) (errs []error)
 ```
 
 #### func (*HiveSubs) WatchIn
 
 ```go
-func (me *HiveSubs) WatchIn(handler uio.WatcherHandler, runHandlerNow bool, subRelPath ...string)
+func (me *HiveSubs) WatchIn(handler ufs.WatcherHandler, runHandlerNow bool, subRelPath ...string)
 ```
 
 #### type Hub

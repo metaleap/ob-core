@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/go-utils/uio"
+	"github.com/go-utils/ufs"
 )
 
 const (
@@ -27,7 +27,7 @@ type HiveRoot struct {
 	//	The current Hive-directory path, set via Hive.Init()
 	Dir string
 
-	fsWatcher *uio.Watcher
+	fsWatcher *ufs.Watcher
 
 	//	Paths to some well-known HiveRoot directories
 	Paths struct {
@@ -41,7 +41,7 @@ type HiveRoot struct {
 
 //	Creates a new log file at: {me.Dir}/logs/{date-time}.log
 func (me *HiveRoot) CreateLogFile() (fullPath string, newOutFile *os.File, err error) {
-	if err = uio.EnsureDirExists(me.Paths.Logs); err == nil {
+	if err = ufs.EnsureDirExists(me.Paths.Logs); err == nil {
 		now := time.Now()
 		fullPath = filepath.Join(me.Paths.Logs, strf("%s__%v.log", now.Format("2006-01-02_15-04-05"), now.UnixNano()))
 		newOutFile, err = os.Create(fullPath)
@@ -77,7 +77,7 @@ func (me *HiveRoot) Init(dir string) {
 func (me *HiveRoot) init(dir string) (err error) {
 	me.Init(dir)
 	if me.fsWatcher == nil {
-		if me.fsWatcher, err = uio.NewWatcher(); err == nil && me.fsWatcher != nil {
+		if me.fsWatcher, err = ufs.NewWatcher(); err == nil && me.fsWatcher != nil {
 			go me.fsWatcher.Go()
 		}
 	}
@@ -86,7 +86,7 @@ func (me *HiveRoot) init(dir string) (err error) {
 
 //	Returns true if the specified directory path points to a valid Hive-directory.
 func (_ *HiveRoot) IsHive(dir string) bool {
-	return uio.DirsOrFilesExistIn(dir, "cust", "dist")
+	return ufs.DirsOrFilesExistIn(dir, "cust", "dist")
 }
 
 //	Returns a cleaned, me.Dir-joined full path for the specified Hive-relative path segments.
