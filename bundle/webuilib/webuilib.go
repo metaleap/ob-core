@@ -3,9 +3,9 @@ package obpkg_webuilib
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 
 	usl "github.com/go-utils/uslice"
-	usort "github.com/go-utils/uslice/sort"
 
 	ob "github.com/openbase/ob-core"
 	obpkg "github.com/openbase/ob-core/bundle"
@@ -31,7 +31,7 @@ func reloadBundleCfg(bundle *obpkg.Bundle) {
 		usl.StrAppendUnique(&cfg.Versions, filepath.Base(dirPath))
 		return true
 	}, "pkg", bundle.NameFull)
-	cfg.Versions = usort.StrSortDesc(cfg.Versions)
+	sort.Sort(sort.Reverse(sort.StringSlice(cfg.Versions)))
 }
 
 func strf(format string, args ...interface{}) string {
