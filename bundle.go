@@ -29,7 +29,8 @@ type Bundle struct {
 		BadDeps []string
 
 		//	The `error` that occurred when loading the `.ob-pkg` file, if any.
-		//	Outside of unlikely file-system issues, this is most likely a TOML syntax error in the file.
+		//	Outside of (arguably unlikely) file-system I/O issues,
+		//	this is most likely a TOML syntax error in the file.
 		LoadErr error
 	}
 
@@ -106,7 +107,7 @@ func (me *Bundle) reload(kind, name, fullName, filePath string) {
 				// println("MORE:" + key)
 			}
 		}
-		if loader := BundleCfgLoaders[kind]; loader != nil {
+		if loader := BundleCfgReloaders[kind]; loader != nil {
 			loader(me)
 		}
 	}

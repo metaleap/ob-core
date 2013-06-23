@@ -19,7 +19,7 @@ var (
 	//	When a `Bundle` gets (re)loaded, after populating its `CfgRaw` hash-maps,
 	//	it calls the appropriate `BundleCfgReloader` associated with its `Kind` to
 	//	refresh its `Cfg` according to its potentially new or changed `CfgRaw`.
-	BundleCfgLoaders = map[string]BundleCfgReloader{}
+	BundleCfgReloaders = map[string]BundleCfgReloader{}
 )
 ```
 
@@ -53,7 +53,8 @@ type Bundle struct {
 		BadDeps []string
 
 		//	The `error` that occurred when loading the `.ob-pkg` file, if any.
-		//	Outside of unlikely file-system issues, this is most likely a TOML syntax error in the file.
+		//	Outside of (arguably unlikely) file-system I/O issues,
+		//	this is most likely a TOML syntax error in the file.
 		LoadErr error
 	}
 
@@ -102,7 +103,7 @@ func (me *Bundle) Ctx() *Ctx
 type BundleCfg map[string]interface{}
 ```
 
-Type for `Bundle.CfgRaw`.
+Type used inside `Bundle.CfgRaw`.
 
 #### type BundleCfgReloader
 
@@ -110,8 +111,8 @@ Type for `Bundle.CfgRaw`.
 type BundleCfgReloader func(*Bundle)
 ```
 
-Used by `Bundle.Kind`-specific imports to register their reload handlers with
-`BundleCfgLoaders`.
+Used by `Bundle.Kind`-specific `import`s to register their reload handlers with
+`BundleCfgReloaders`.
 
 #### type BundleRegistry
 

@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	ob.BundleCfgLoaders["webuilib"] = reloadBundleCfg
+	ob.BundleCfgReloaders["webuilib"] = reloadBundleCfg
 }
 
 func reloadBundleCfg(bundle *ob.Bundle) {

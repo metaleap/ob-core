@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	ob.BundleCfgLoaders["webuiskin"] = reloadBundleCfg
+	ob.BundleCfgReloaders["webuiskin"] = reloadBundleCfg
 }
 
 func reloadBundleCfg(bundle *ob.Bundle) {
