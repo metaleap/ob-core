@@ -8,14 +8,13 @@ import (
 	usl "github.com/go-utils/uslice"
 
 	ob "github.com/openbase/ob-core"
-	obpkg "github.com/openbase/ob-core/bundle"
 )
 
 func init() {
-	obpkg.BundleCfgLoaders["webuilib"] = reloadBundleCfg
+	ob.BundleCfgLoaders["webuilib"] = reloadBundleCfg
 }
 
-func reloadBundleCfg(bundle *obpkg.Bundle) {
+func reloadBundleCfg(bundle *ob.Bundle) {
 	var cfg *BundleCfg
 	if cfg, _ = bundle.Cfg.(*BundleCfg); cfg == nil {
 		cfg = newBundleCfg()
@@ -27,7 +26,7 @@ func reloadBundleCfg(bundle *obpkg.Bundle) {
 	js, _ := bundle.CfgRaw.Default["js"].([]interface{})
 	cfg.Js = usl.StrConvert(js, true)
 	cfg.Versions = []string{}
-	ob.Hive.Subs.WalkDirsIn(func(dirPath string) bool {
+	bundle.Ctx().Hive.Subs.WalkDirsIn(func(dirPath string) bool {
 		usl.StrAppendUnique(&cfg.Versions, filepath.Base(dirPath))
 		return true
 	}, "pkg", bundle.NameFull)
@@ -50,7 +49,7 @@ type BundleCfg struct {
 	//	sorted descending-alphabetically ("from newest to oldest")
 	Versions []string
 
-	bundle *obpkg.Bundle
+	bundle *ob.Bundle
 }
 
 func newBundleCfg() (me *BundleCfg) {

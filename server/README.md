@@ -6,55 +6,65 @@ Web server functionality, used by the cmd/ob-server main package
 
 ## Usage
 
+#### type HttpHandler
+
 ```go
-var (
-	//	Multi-plexing request router
-	Router *webmux.Router
+type HttpHandler struct {
+	http.Handler
 
 	//	Custom event handlers
 	On struct {
 		//	Request-related event handlers
 		Request struct {
-			//	Event handlers to be invoked before serving a web request (except static files)
-			Serving RequestContextEventHandlers
+			//	Event handlers to be invoked before
+			//	serving a web request (except static files).
+			PreServe RequestContextHandlers
 
-			//	Event handlers to be invoked immediately after serving a web request (except static files)
-			Served RequestContextEventHandlers
+			//	Event handlers to be invoked immediately after
+			//	serving a web request (except static files).
+			PostServe RequestContextHandlers
 		}
 	}
-)
+}
 ```
 
-#### func  Init
+Must be initialized via `NewHttpHandler`.
+
+#### func  NewHttpHandler
 
 ```go
-func Init()
+func NewHttpHandler(ctx *ob.Ctx) (router *HttpHandler)
 ```
-Initializes the package for serving web requests. To be called after ob.Init()
+Initializes a new `*HttpHandler` to host the specified `*ob.Ctx`.
+
+#### func (*HttpHandler) Ctx
+
+```go
+func (me *HttpHandler) Ctx() *ob.Ctx
+```
+Returns the `*ob.Ctx` hosted by `me`.
 
 #### type RequestContext
 
 ```go
 type RequestContext struct {
-	//	Context related to the current Page, if any.
-	obwebui.PageContext
+	*ob.Ctx
 
-	//	The http.ResponseWriter for this RequestContext
+	//	Context related to the current `Page`, if any.
+	*obwebui.PageContext
+
+	//	The `http.ResponseWriter` for this `RequestContext`.
 	Out http.ResponseWriter
 
-	//	The http.Request for this RequestContext
+	//	The `http.Request` for this `RequestContext`.
 	Req *http.Request
 
-	//	Defaults to ob.Log
+	//	Defaults to `ob.Log`.
 	Log ob.Logger
-
-	//	Not used in the default stand-alone implementation (cmd/ob-server).
-	//	May be used in sandboxed mode (eg. the GAE package uses it for the current appengine.Context)
-	Ctx interface{}
 }
 ```
 
-Encapsulates and provides context for a (non-static) web request
+Provides context for a non-static web request.
 
 #### func (*RequestContext) Get
 
@@ -70,28 +80,28 @@ func (me *RequestContext) Set(key, val interface{})
 ```
 http://www.gorillatoolkit.org/pkg/context#Set
 
-#### type RequestContextEventHandler
+#### type RequestContextHandler
 
 ```go
-type RequestContextEventHandler func(*RequestContext)
+type RequestContextHandler func(*RequestContext)
 ```
 
-A function that accepts a *RequestContext
+A function that accepts a `*RequestContext`.
 
-#### type RequestContextEventHandlers
+#### type RequestContextHandlers
 
 ```go
-type RequestContextEventHandlers []RequestContextEventHandler
+type RequestContextHandlers []RequestContextHandler
 ```
 
-A collection of RequestContextEventHandler function-values
+A collection of `RequestContextHandler` functions.
 
-#### func (*RequestContextEventHandlers) Add
+#### func (*RequestContextHandlers) Add
 
 ```go
-func (me *RequestContextEventHandlers) Add(eventHandlers ...RequestContextEventHandler)
+func (me *RequestContextHandlers) Add(handlers ...RequestContextHandler)
 ```
-Adds the specified eventHandlers to me
+Appends all the specified `handlers` to `me`.
 
 --
 **godocdown** http://github.com/robertkrimen/godocdown

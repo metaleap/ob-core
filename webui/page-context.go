@@ -3,7 +3,7 @@ package obwebui
 //	WebUi.Libs[..].CssUrl
 
 import (
-	obpkg "github.com/openbase/ob-core/bundle"
+	ob "github.com/openbase/ob-core"
 	obpkg_webuilib "github.com/openbase/ob-core/bundle/webuilib"
 	obpkg_webuiskin "github.com/openbase/ob-core/bundle/webuiskin"
 )
@@ -14,16 +14,21 @@ type PageContextWebUi struct {
 }
 
 type PageContext struct {
+	ctx *ob.Ctx
+
 	WebUi PageContextWebUi
 }
 
-func (me *PageContext) Init() {
+func NewPageContext(ctx *ob.Ctx) (me *PageContext) {
+	me = &PageContext{ctx: ctx}
 	var cfg *obpkg_webuilib.BundleCfg
-	skinBundle := obpkg.Reg.ByName("webuiskin", "fluid")
-	me.WebUi.SkinTemplate = getPageTemplate(skinBundle.Cfg.(*obpkg_webuiskin.BundleCfg).SubRelTemplateDirPath)
-	for _, bundle := range obpkg.Reg.ByKind("webuilib", skinBundle.Info.Require) {
+	reg := ctx.Bundles()
+	skinBundle := reg.ByName("webuiskin", "fluid")
+	me.WebUi.SkinTemplate = getPageTemplate(ctx, skinBundle.Cfg.(*obpkg_webuiskin.BundleCfg).SubRelTemplateDirPath)
+	for _, bundle := range reg.ByKind("webuilib", skinBundle.Info.Require) {
 		if cfg, _ = bundle.Cfg.(*obpkg_webuilib.BundleCfg); cfg != nil {
 			me.WebUi.Libs = append(me.WebUi.Libs, cfg)
 		}
 	}
+	return
 }

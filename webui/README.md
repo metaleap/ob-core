@@ -15,10 +15,10 @@ type PageContext struct {
 ```
 
 
-#### func (*PageContext) Init
+#### func  NewPageContext
 
 ```go
-func (me *PageContext) Init()
+func NewPageContext(ctx *ob.Ctx) (me *PageContext)
 ```
 
 #### type PageContextWebUi

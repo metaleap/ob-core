@@ -21,12 +21,12 @@ func init() {
 	pageTemplateCache.m = map[string]*PageTemplate{}
 }
 
-func getPageTemplate(subRelDirPath string) *PageTemplate {
+func getPageTemplate(ctx *ob.Ctx, subRelDirPath string) *PageTemplate {
 	pageTemplateCache.Lock()
 	defer pageTemplateCache.Unlock()
 	pt, ok := pageTemplateCache.m[subRelDirPath]
 	if !ok {
-		pt = newPageTemplate(subRelDirPath)
+		pt = newPageTemplate(ctx, subRelDirPath)
 		pt.load()
 		pageTemplateCache.m[subRelDirPath] = pt
 	}
@@ -34,12 +34,13 @@ func getPageTemplate(subRelDirPath string) *PageTemplate {
 }
 
 type PageTemplate struct {
+	ctx *ob.Ctx
 	*template.Template
 	subRelDirPath string
 }
 
-func newPageTemplate(subRelDirPath string) (me *PageTemplate) {
-	me = &PageTemplate{subRelDirPath: subRelDirPath}
+func newPageTemplate(ctx *ob.Ctx, subRelDirPath string) (me *PageTemplate) {
+	me = &PageTemplate{ctx: ctx, subRelDirPath: subRelDirPath}
 	return
 }
 
@@ -60,5 +61,5 @@ func (me *PageTemplate) load() {
 		}
 		return
 	}
-	ob.Hive.Subs.WatchIn(loader, true, me.subRelDirPath)
+	me.ctx.Hive.Subs.WatchIn(loader, true, me.subRelDirPath)
 }

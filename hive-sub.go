@@ -6,12 +6,12 @@ import (
 	"github.com/go-utils/ufs"
 )
 
-//	Represents either the dist or the cust directory in a hive directory
+//	Represents either the `dist` or the `cust` sub-directory inside a `HiveRoot`.
 type HiveSub struct {
 	name []string
 	root *HiveRoot
 
-	//	Paths to some well-known HiveSub directories
+	//	Paths to some well-known `HiveSub` directories
 	Paths struct {
 		//	{hive}/{sub}/client
 		Client string
@@ -30,13 +30,13 @@ func (me *HiveSub) init(root *HiveRoot, name string) {
 	p.Client, p.ClientPub, p.Pkg = me.Path("client"), me.Path("client", "pub"), me.Path("pkg")
 }
 
-//	Returns whether the specified {hive}/{sub}-relative directory exists
+//	Returns whether the specified `{hive}/{sub}`-relative directory exists.
 func (me *HiveSub) DirExists(relPath ...string) bool {
 	return ufs.DirExists(me.Path(relPath...))
 }
 
-//	Returns a {hive}/{sub}-joined representation of the specified
-//	{hive}/{sub}-relative path, if it represents an existing directory
+//	Returns a `{hive}/{sub}`-joined representation of the specified
+//	`{hive}/{sub}`-relative path, if it represents an existing directory.
 func (me *HiveSub) DirPath(relPath ...string) (dirPath string) {
 	if me.DirExists(relPath...) {
 		dirPath = me.Path(relPath...)
@@ -44,13 +44,13 @@ func (me *HiveSub) DirPath(relPath ...string) (dirPath string) {
 	return
 }
 
-//	Returns whether the specified {hive}/{sub}-relative file exists
+//	Returns whether the specified `{hive}/{sub}`-relative file exists.
 func (me *HiveSub) FileExists(relPath ...string) bool {
 	return ufs.FileExists(me.Path(relPath...))
 }
 
-//	Returns a {hive}/{sub}-joined representation of the specified
-//	{hive}/{sub}-relative path, if it represents an existing file
+//	Returns a `{hive}/{sub}`-joined representation of the specified
+//	`{hive}/{sub}`-relative path, if it represents an existing file.
 func (me *HiveSub) FilePath(relPath ...string) (filePath string) {
 	if me.FileExists(relPath...) {
 		filePath = me.Path(relPath...)
@@ -58,13 +58,13 @@ func (me *HiveSub) FilePath(relPath ...string) (filePath string) {
 	return
 }
 
-//	Returns a {hive}/{sub}-joined representation of the specified
-//	{hive}/{sub}-relative path
+//	Returns a `{hive}/{sub}`-joined representation of the specified
+//	`{hive}/{sub}`-relative path (regardless of whether it exists).
 func (me *HiveSub) Path(relPath ...string) string {
 	return me.root.Path(append(me.name, relPath...)...)
 }
 
-//	Reads the file at the specified {hive}/{sub}-relative path
+//	Reads the file at the specified `{hive}/{sub}`-relative path.
 func (me *HiveSub) ReadFile(relPath ...string) (data []byte, err error) {
 	data, err = ioutil.ReadFile(me.Path(relPath...))
 	return

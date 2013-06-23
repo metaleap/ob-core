@@ -1,35 +1,39 @@
-package obpkg
+package obcore
 
 import (
 	"github.com/go-forks/toml"
 
 	"github.com/go-utils/uslice"
-
-	ob "github.com/openbase/ob-core"
 )
 
-//	Represents a bundle found in a {hive}/{sub}/pkg/{kind-name}/{name.kind.ob-pkg} file
+//	Represents a bundle package found in a `{hive}/{sub}/pkg/{kind-name}/{name.kind.ob-pkg}` file.
 type Bundle struct {
-	//	The kind of bundle, according to its directory name, for example "webuilib"
+	ctx *Ctx
+	reg *BundleRegistry
+
+	//	The kind of this `Bundle`, according to its directory name,
+	//	for example `webuilib`.
 	Kind string
 
-	//	The name of this bundle, not including its Kind
+	//	The name of this `Bundle`, not including its `Kind`.
 	Name string
 
-	//	The full identifier of this bundle, which is Kind and Name joined by a dash, for example "webuilib-jquery"
+	//	The full identifier of this `Bundle`, which is `Kind` and `Name`
+	//	joined by a dash, for example `webuilib-jquery`.
 	NameFull string
 
 	//	Diagnostic info
 	Diag struct {
-		//	Full bundle names of all Info.Require entries that are not currently installed inside {hive}/{sub}/pkg/
+		//	Full `Bundle` names of all `Info.Require` entries that
+		//	are not currently installed inside `{hive}/{sub}/pkg/`.
 		BadDeps []string
 
-		//	The error that occurred when loading the .ob-pkg file, if any.
-		//	Outside of unlikely hard-disk crashes, this is most likely a TOML syntax error in the file.
+		//	The `error` that occurred when loading the `.ob-pkg` file, if any.
+		//	Outside of unlikely file-system issues, this is most likely a TOML syntax error in the file.
 		LoadErr error
 	}
 
-	//	Information from the '[bundle]' section of the .ob-pkg bundle configuration file.
+	//	Information from the `[bundle]` section of the `.ob-pkg` bundle configuration file.
 	Info struct {
 		//	Human-readable bundle title
 		Title string
@@ -40,28 +44,32 @@ type Bundle struct {
 		//	Web address for more information, in the case of 3rd-party bundles
 		Www string
 
-		//	Denotes (fully-qualified) bundles required for this bundle to function
+		//	Names fully-qualified bundles required for this bundle to function
 		Require []string
 	}
 
-	//	A value or struct that represents CfgRaw in a 'native', bundle-specific way.
-	//	To be set by a BundleCfgReloader registered in BundleCfgLoaders.
+	//	Represents `CfgRaw` in a 'native'/'parsed'/'processed', bundle-specific way.
+	//	To be set by a `BundleCfgReloader` registered in `BundleCfgLoaders`.
 	Cfg interface{}
 
-	//	Information from the '[default]' and other sections of the .ob-pkg bundle configuration file.
+	//	Unprocessed information loaded from the `.ob-pkg` bundle configuration file.
 	CfgRaw struct {
-		//	Information from the '[default]' section of the .ob-pkg bundle configuration file.
+		//	Information from the `[default]` section.
 		Default BundleCfg
 
-		//	Information from any other sections of the .ob-pkg bundle configuration file.
+		//	Information from any other sections.
 		More map[string]BundleCfg
 	}
 }
 
-func newBundle() (me *Bundle) {
-	me = &Bundle{}
+func newBundle(reg *BundleRegistry) (me *Bundle) {
+	me = &Bundle{reg: reg, ctx: reg.ctx}
 	me.CfgRaw.Default, me.CfgRaw.More = BundleCfg{}, map[string]BundleCfg{}
 	return
+}
+
+func (me *Bundle) Ctx() *Ctx {
+	return me.ctx
 }
 
 //	This may load from the primary dist .ob-pkg file, or just partial additions/overrides from cust.
@@ -74,7 +82,7 @@ func (me *Bundle) reload(kind, name, fullName, filePath string) {
 		return
 	}
 	if _, me.Diag.LoadErr = toml.DecodeFile(filePath, config); me.Diag.LoadErr != nil {
-		ob.Log.Errorf("[BUNDLE] %s", me.Diag.LoadErr.Error())
+		me.ctx.Log.Errorf("[BUNDLE] %s", me.Diag.LoadErr.Error())
 	} else {
 		var (
 			ok  bool

@@ -7,45 +7,40 @@ import (
 	webctx "github.com/gorilla/context"
 
 	ob "github.com/openbase/ob-core"
-	obpkg "github.com/openbase/ob-core/bundle"
 	obwebui "github.com/openbase/ob-core/webui"
 )
 
-//	A function that accepts a *RequestContext
-type RequestContextEventHandler func(*RequestContext)
+//	A function that accepts a `*RequestContext`.
+type RequestContextHandler func(*RequestContext)
 
-//	A collection of RequestContextEventHandler function-values
-type RequestContextEventHandlers []RequestContextEventHandler
+//	A collection of `RequestContextHandler` functions.
+type RequestContextHandlers []RequestContextHandler
 
-//	Adds the specified eventHandlers to me
-func (me *RequestContextEventHandlers) Add(eventHandlers ...RequestContextEventHandler) {
-	*me = append(*me, eventHandlers...)
+//	Appends all the specified `handlers` to `me`.
+func (me *RequestContextHandlers) Add(handlers ...RequestContextHandler) {
+	*me = append(*me, handlers...)
 }
 
-//	Encapsulates and provides context for a (non-static) web request
+//	Provides context for a non-static web request.
 type RequestContext struct {
-	//	Context related to the current Page, if any.
-	obwebui.PageContext
+	*ob.Ctx
 
-	//	The http.ResponseWriter for this RequestContext
+	//	Context related to the current `Page`, if any.
+	*obwebui.PageContext
+
+	//	The `http.ResponseWriter` for this `RequestContext`.
 	Out http.ResponseWriter
 
-	//	The http.Request for this RequestContext
+	//	The `http.Request` for this `RequestContext`.
 	Req *http.Request
 
-	//	Defaults to ob.Log
+	//	Defaults to `ob.Log`.
 	Log ob.Logger
-
-	//	Not used in the default stand-alone implementation (cmd/ob-server).
-	//	May be used in sandboxed mode (eg. the GAE package uses it for the current appengine.Context)
-	Ctx interface{}
-
-	bundles *obpkg.Registry
 }
 
-func newRequestContext(httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
-	me = &RequestContext{Out: httpResponse, Req: httpRequest, Log: ob.Log}
-	me.PageContext.Init()
+func newRequestContext(ctx *ob.Ctx, httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
+	me = &RequestContext{Ctx: ctx, Out: httpResponse, Req: httpRequest, Log: ctx.Log}
+	me.PageContext = obwebui.NewPageContext(ctx)
 	return
 }
 
@@ -56,7 +51,7 @@ func (me *RequestContext) Get(key interface{}) interface{} {
 
 func (me *RequestContext) serveRequest() {
 	var w bytes.Buffer
-	err := me.WebUi.SkinTemplate.Execute(&w, me)
+	err := me.PageContext.WebUi.SkinTemplate.Execute(&w, me)
 	if err == nil {
 		me.Out.Write(w.Bytes())
 	} else {

@@ -13,7 +13,7 @@ import (
 
 func main() {
 	//	command-line flags
-	dirPath := flag.String("hive", "", fmt.Sprintf("%s hive directory path to use.\nIf omitted, defaults to either current directory, or the path stored in\nthe $%s environment variable: '%s'.\n", ob.OB_TITLE, ob.ENV_OBHIVE, os.Getenv(ob.ENV_OBHIVE)))
+	dirPath := flag.String("hive", "", fmt.Sprintf("%s hive directory path to use.\nIf omitted, defaults to either current directory, or the path stored in\nthe $%s environment variable: '%s'.\n", ob.OB_TITLE, obsrv_daemon.ENV_OBHIVE, os.Getenv(obsrv_daemon.ENV_OBHIVE)))
 	addr := flag.String("addr", ":23456", "TCP address to serve HTTP requests.\nSpecify ':http' for default HTTP port or ':https' for default HTTPS port\n")
 	tlsCertFile := flag.String("tls_cert", "", "File name containing a certificate for HTTPS-serving via TLS.\nIf the certificate is signed by a certificate authority, tls_cert should be\nthe concatenation of the server's certificate followed by the CA's certificate.\n")
 	tlsKeyFile := flag.String("tls_key", "", "File name containing a matching private key for TLS serving.\nFor HTTPS/TLS serving, BOTH tls_cert AND tls_key are required.")

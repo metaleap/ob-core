@@ -3,14 +3,14 @@ package obpkg_webuiskin
 import (
 	"path/filepath"
 
-	obpkg "github.com/openbase/ob-core/bundle"
+	ob "github.com/openbase/ob-core"
 )
 
 func init() {
-	obpkg.BundleCfgLoaders["webuiskin"] = reloadBundleCfg
+	ob.BundleCfgLoaders["webuiskin"] = reloadBundleCfg
 }
 
-func reloadBundleCfg(bundle *obpkg.Bundle) {
+func reloadBundleCfg(bundle *ob.Bundle) {
 	var cfg *BundleCfg
 	if cfg, _ = bundle.Cfg.(*BundleCfg); cfg == nil {
 		cfg = newBundleCfg()
@@ -27,7 +27,7 @@ type BundleCfg struct {
 	//	pkg/webuiskin-fluid/template
 	SubRelTemplateDirPath string
 
-	bundle *obpkg.Bundle
+	bundle *ob.Bundle
 }
 
 func newBundleCfg() (me *BundleCfg) {

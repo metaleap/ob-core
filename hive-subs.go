@@ -4,7 +4,7 @@ import (
 	"github.com/go-utils/ufs"
 )
 
-//	Used for Hive.Subs
+//	Only used for `Hive.Subs`.
 type HiveSubs struct {
 	root *HiveRoot
 
@@ -21,12 +21,12 @@ func (me *HiveSubs) init(root *HiveRoot) {
 	me.Cust.init(root, "cust")
 }
 
-//	me.Dist.FileExists(subRelPath...) || me.Dist.FileExists(subRelPath...)
+//	Returns whether `me.Dist` or `me.Cust` contains the specified file.
 func (me *HiveSubs) FileExists(subRelPath ...string) bool {
 	return me.Dist.FileExists(subRelPath...) || me.Cust.FileExists(subRelPath...)
 }
 
-//	Returns either me.Cust.FilePath(subRelPath ...) or me.Dist.FilePath(subRelPath ...)
+//	Returns either `me.Cust.FilePath(subRelPath...)` or `me.Dist.FilePath(subRelPath...)`.
 func (me *HiveSubs) FilePath(subRelPath ...string) (filePath string) {
 	if filePath = me.Cust.FilePath(subRelPath...); len(filePath) == 0 {
 		filePath = me.Dist.FilePath(subRelPath...)
@@ -34,6 +34,7 @@ func (me *HiveSubs) FilePath(subRelPath ...string) (filePath string) {
 	return
 }
 
+//	`ufs.WalkAllDirs` for `me.Dist` and `me.Cust`.
 func (me *HiveSubs) WalkAllDirs(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
@@ -45,6 +46,7 @@ func (me *HiveSubs) WalkAllDirs(visitor ufs.WalkerVisitor, relPath ...string) (e
 	return
 }
 
+//	`ufs.WalkAllFiles` for `me.Dist` and `me.Cust`.
 func (me *HiveSubs) WalkAllFiles(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
@@ -56,6 +58,7 @@ func (me *HiveSubs) WalkAllFiles(visitor ufs.WalkerVisitor, relPath ...string) (
 	return
 }
 
+//	`ufs.WalkDirsIn` for `me.Dist` and `me.Cust`.
 func (me *HiveSubs) WalkDirsIn(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
@@ -67,6 +70,7 @@ func (me *HiveSubs) WalkDirsIn(visitor ufs.WalkerVisitor, relPath ...string) (er
 	return
 }
 
+//	`ufs.WalkFilesIn` for `me.Dist` and `me.Cust`.
 func (me *HiveSubs) WalkFilesIn(visitor ufs.WalkerVisitor, relPath ...string) (errs []error) {
 	dp := me.Dist.DirPath(relPath...)
 	if len(dp) > 0 {
@@ -78,6 +82,7 @@ func (me *HiveSubs) WalkFilesIn(visitor ufs.WalkerVisitor, relPath ...string) (e
 	return
 }
 
+//	`ufs.DirWatcher.WatchIn` for `me.Dist` and `me.Cust`.
 func (me *HiveSubs) WatchIn(handler ufs.WatcherHandler, runHandlerNow bool, subRelPath ...string) {
 	me.root.fsWatcher.WatchIn(me.Dist.Path(subRelPath...), "*", runHandlerNow, handler)
 	me.root.fsWatcher.WatchIn(me.Cust.Path(subRelPath...), "*", runHandlerNow, handler)

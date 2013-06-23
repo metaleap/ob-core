@@ -8,38 +8,28 @@ import (
 	"github.com/go-utils/ufs"
 )
 
-const (
-	//	The name of the environment variable storing the Hive-directory path, if set.
-	//	Used as a fall-back by Hive.GuessDir().
-	ENV_OBHIVE = "OBHIVE"
-)
-
-var (
-	//	Provides access to the 'Hive-directory' used throughout the package.
-	//	The 'Hive' is the root directory with the 'dist' and 'cust' sub-directories,
-	//	which contain configuration files, static web-served files, "template schema"
-	//	files, bundle manifests and possibly data-base files depending on setup.
-	Hive HiveRoot
-)
-
-//	Provides access to a specified Hive directory.
+//	Provides access to a specified `Hive`-directory.
+//
+//	A `Hive` is the root directory with `dist` and `cust` sub-directories,
+//	which contain configuration files, static web-served files, "template schema"
+//	files, bundle manifests and possibly data-base files depending on setup.
 type HiveRoot struct {
-	//	The current Hive-directory path, set via Hive.Init()
+	//	The current `Hive`-directory path, set via `HiveRoot.Init`
 	Dir string
 
 	fsWatcher *ufs.Watcher
 
-	//	Paths to some well-known HiveRoot directories
+	//	Paths to some well-known `Hive` sub-directories
 	Paths struct {
 		//	{hive}/logs
 		Logs string
 	}
 
-	//	Sub-hives
+	//	Represents the `Hive` sub-directories `dist` and `cust`
 	Subs HiveSubs
 }
 
-//	Creates a new log file at: {me.Dir}/logs/{date-time}.log
+//	Creates a new log file at `{me.Dir}/logs/{date-time}.log`.
 func (me *HiveRoot) CreateLogFile() (fullPath string, newOutFile *os.File, err error) {
 	if err = ufs.EnsureDirExists(me.Paths.Logs); err == nil {
 		now := time.Now()
@@ -49,33 +39,18 @@ func (me *HiveRoot) CreateLogFile() (fullPath string, newOutFile *os.File, err e
 	return
 }
 
-func (me *HiveRoot) dispose() {
+func (me *HiveRoot) dispose() (err error) {
 	if me.fsWatcher != nil {
-		me.fsWatcher.Close()
+		err = me.fsWatcher.Close()
 		me.fsWatcher = nil
-	}
-}
-
-//	Returns userSpecified if that is a valid Hive-directory path as per HiveRoot.IsHive(),
-//	else returns the value of the OBHIVE environment variable (regardless of path validity).
-func (me *HiveRoot) GuessHiveRootDir(userSpecified string) (guess string) {
-	if guess = userSpecified; !me.IsHive(guess) {
-		guess = os.Getenv(ENV_OBHIVE)
 	}
 	return
 }
 
-//	Initializes me.Dir to the specified dir (without checking it, call IsHive() beforehand to do so).
-//	Then initializes me.Subs and me.Paths based on me.Dir.
-func (me *HiveRoot) Init(dir string) {
+func (me *HiveRoot) init(dir string) (err error) {
 	me.Dir = dir
 	me.Subs.init(me)
-	p := &me.Paths
-	p.Logs = me.Path("logs")
-}
-
-func (me *HiveRoot) init(dir string) (err error) {
-	me.Init(dir)
+	me.Paths.Logs = me.Path("logs")
 	if me.fsWatcher == nil {
 		if me.fsWatcher, err = ufs.NewWatcher(); err == nil && me.fsWatcher != nil {
 			go me.fsWatcher.Go()
@@ -84,13 +59,14 @@ func (me *HiveRoot) init(dir string) (err error) {
 	return
 }
 
-//	Returns true if the specified directory path points to a valid Hive-directory.
-func (_ *HiveRoot) IsHive(dir string) bool {
-	return ufs.DirsOrFilesExistIn(dir, "cust", "dist")
+//	Returns whether the specified `dirPath` points to a valid `Hive`-directory.
+func IsHive(dirPath string) bool {
+	return ufs.DirsOrFilesExistIn(dirPath, "cust", "dist")
 }
 
-//	Returns a cleaned, me.Dir-joined full path for the specified Hive-relative path segments.
-//	For example, if me.Dir is "obtest/hive", then me.Path("pkg", "mysql") returns "obtest/hive/pkg/mysql"
+//	Returns a cleaned, `me.Dir`-joined full path for the specified `Hive`-relative path segments.
+//
+//	For example, if `me.Dir` is `obtest/hive`, then `me.Path("logs", "unknowable.log")` returns `obtest/hive/logs/unknowable.log`.
 func (me *HiveRoot) Path(relPath ...string) (fullFsPath string) {
 	if fullFsPath = filepath.Join(relPath...); len(me.Dir) > 0 {
 		fullFsPath = filepath.Join(me.Dir, fullFsPath)

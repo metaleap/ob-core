@@ -1,5 +1,6 @@
 package obcore
 
+/*
 func RootHub() *Hub {
 	return GetHub("/")
 }
@@ -20,3 +21,4 @@ func newHub() (me *Hub) {
 func (me *Hub) Parent() (parent *Hub) {
 	return me.parent
 }
+*/
