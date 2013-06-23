@@ -199,8 +199,8 @@ Initializes and returns a new `*Ctx` providing access to the specified
 `openbase/ob-core/server/standalone` or `openbase/ob-gae`.
 
 - If `logger` is `nil`, `me.Log` is set to a no-op dummy and logging is
-disabled. In any event, `Init` doesn't log the `err` being returned (if any), so
-be sure to handle it.
+disabled. In any event, `NewCtx` doesn't log the `err` being returned (if any),
+so be sure to handle it.
 
 Whenever `err` is `nil`, `me` is non-`nil` and vice versa.
 
