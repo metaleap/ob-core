@@ -4,17 +4,19 @@ import (
 	"github.com/go-utils/uslice"
 )
 
-//	Used by `Bundle.Kind`-specific imports to register their reload handlers with `BundleCfgLoaders`.
-type BundleCfgReloader func(*Bundle)
-
 //	Type for `Bundle.CfgRaw`.
 type BundleCfg map[string]interface{}
 
-//	Contains one `BundleCfgReloader` handler per bundle kind.
-//	When a `Bundle` gets (re)loaded, after populating its `CfgRaw` hash-maps,
-//	it calls the appropriate `BundleCfgReloader` associated with its `Kind` to
-//	refresh its `Cfg` according to its potentially new or changed `CfgRaw`.
-var BundleCfgLoaders = map[string]BundleCfgReloader{}
+//	Used by `Bundle.Kind`-specific imports to register their reload handlers with `BundleCfgLoaders`.
+type BundleCfgReloader func(*Bundle)
+
+var (
+	//	Contains one `BundleCfgReloader` handler per bundle kind.
+	//	When a `Bundle` gets (re)loaded, after populating its `CfgRaw` hash-maps,
+	//	it calls the appropriate `BundleCfgReloader` associated with its `Kind` to
+	//	refresh its `Cfg` according to its potentially new or changed `CfgRaw`.
+	BundleCfgLoaders = map[string]BundleCfgReloader{}
+)
 
 //	A collection of `*Bundle`s.
 type Bundles []*Bundle

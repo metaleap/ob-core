@@ -14,12 +14,14 @@ const (
 ```
 
 ```go
-var BundleCfgLoaders = map[string]BundleCfgReloader{}
+var (
+	//	Contains one `BundleCfgReloader` handler per bundle kind.
+	//	When a `Bundle` gets (re)loaded, after populating its `CfgRaw` hash-maps,
+	//	it calls the appropriate `BundleCfgReloader` associated with its `Kind` to
+	//	refresh its `Cfg` according to its potentially new or changed `CfgRaw`.
+	BundleCfgLoaders = map[string]BundleCfgReloader{}
+)
 ```
-Contains one `BundleCfgReloader` handler per bundle kind. When a `Bundle` gets
-(re)loaded, after populating its `CfgRaw` hash-maps, it calls the appropriate
-`BundleCfgReloader` associated with its `Kind` to refresh its `Cfg` according to
-its potentially new or changed `CfgRaw`.
 
 #### func  IsHive
 
