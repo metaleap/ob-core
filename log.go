@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-//	An interface for log output. `ObLogger` provides the canonical implementation.
+//	An interface for log output. `NewLogger` provides the canonical implementation.
 type Logger interface {
 	// `Debugf` formats its arguments according to the `format`, analogous to `fmt.Printf`,
 	// and records the text as a log message at Debug level.
@@ -28,57 +28,57 @@ type Logger interface {
 	Criticalf(format string, args ...interface{})
 }
 
-//	The canonical implementation of the `Logger` interface, using a standard `log.Logger`.
-type ObLogger struct {
-	logger *log.Logger
-}
-
-//	Creates and returns a new `*ObLogger`; `out` is optional and if `nil`, this disables logging.
-func NewLogger(out io.Writer) (me *ObLogger) {
-	me = &ObLogger{}
+//	Creates and returns a new `Logger`; `out` is optional and if `nil`, this disables logging.
+func NewLogger(out io.Writer) Logger {
+	var me logger
 	if out != nil {
-		me.logger = log.New(out, "", log.LstdFlags)
+		me.Logger = log.New(out, "", log.LstdFlags)
 	}
-	return
+	return &me
+}
+
+//	The canonical implementation of the `Logger` interface, using a standard `log.Logger`.
+type logger struct {
+	*log.Logger
 }
 
 // Implements `Logger` interface.
-func (me *ObLogger) Debugf(format string, args ...interface{}) {
-	if me.logger != nil {
-		me.logger.Printf("[DEBUG]\t\t"+format+"\n", args...)
-	}
-}
-
-// Implements `Logger` interface.
-func (me *ObLogger) Infof(format string, args ...interface{}) {
-	if me.logger != nil {
-		me.logger.Printf("[INFO]\t\t"+format+"\n", args...)
+func (me *logger) Debugf(format string, args ...interface{}) {
+	if me.Logger != nil {
+		me.Logger.Printf("[DEBUG]\t\t"+format+"\n", args...)
 	}
 }
 
 // Implements `Logger` interface.
-func (me *ObLogger) Warningf(format string, args ...interface{}) {
-	if me.logger != nil {
-		me.logger.Printf("[WARNING]\t"+format+"\n", args...)
+func (me *logger) Infof(format string, args ...interface{}) {
+	if me.Logger != nil {
+		me.Logger.Printf("[INFO]\t\t"+format+"\n", args...)
 	}
 }
 
 // Implements `Logger` interface.
-func (me *ObLogger) Error(err error) error {
+func (me *logger) Warningf(format string, args ...interface{}) {
+	if me.Logger != nil {
+		me.Logger.Printf("[WARNING]\t"+format+"\n", args...)
+	}
+}
+
+// Implements `Logger` interface.
+func (me *logger) Error(err error) error {
 	me.Errorf(err.Error())
 	return err
 }
 
 // Implements `Logger` interface.
-func (me *ObLogger) Errorf(format string, args ...interface{}) {
-	if me.logger != nil {
-		me.logger.Printf("[ERROR]\t\t"+format+"\n", args...)
+func (me *logger) Errorf(format string, args ...interface{}) {
+	if me.Logger != nil {
+		me.Logger.Printf("[ERROR]\t\t"+format+"\n", args...)
 	}
 }
 
 // Implements `Logger` interface.
-func (me *ObLogger) Criticalf(format string, args ...interface{}) {
-	if me.logger != nil {
-		me.logger.Printf("[CRITICAL]\t"+format+"\n", args...)
+func (me *logger) Criticalf(format string, args ...interface{}) {
+	if me.Logger != nil {
+		me.Logger.Printf("[CRITICAL]\t"+format+"\n", args...)
 	}
 }

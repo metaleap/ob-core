@@ -21,10 +21,10 @@ var (
 //	A collection of `*Bundle`s.
 type Bundles []*Bundle
 
-//	Implements `sort.Interface.Len()`.
+//	Implements `sort.Interface`.
 func (me Bundles) Len() int { return len(me) }
 
-//	Implements `sort.Interface.Less()`.
+//	Implements `sort.Interface`.
 func (me Bundles) Less(i, j int) bool {
 	pi, pj := me[i], me[j]
 	//	If i requires j, than j<i
@@ -38,5 +38,5 @@ func (me Bundles) Less(i, j int) bool {
 	return pi.NameFull < pj.NameFull
 }
 
-//	Implements `sort.Interface.Swap()`.
+//	Implements `sort.Interface`.
 func (me Bundles) Swap(i, j int) { me[i], me[j] = me[j], me[i] }

@@ -155,21 +155,21 @@ A collection of `*Bundle`s.
 ```go
 func (me Bundles) Len() int
 ```
-Implements `sort.Interface.Len()`.
+Implements `sort.Interface`.
 
 #### func (Bundles) Less
 
 ```go
 func (me Bundles) Less(i, j int) bool
 ```
-Implements `sort.Interface.Less()`.
+Implements `sort.Interface`.
 
 #### func (Bundles) Swap
 
 ```go
 func (me Bundles) Swap(i, j int)
 ```
-Implements `sort.Interface.Swap()`.
+Implements `sort.Interface`.
 
 #### type Ctx
 
@@ -417,67 +417,15 @@ type Logger interface {
 }
 ```
 
-An interface for log output. `ObLogger` provides the canonical implementation.
-
-#### type ObLogger
-
-```go
-type ObLogger struct {
-}
-```
-
-The canonical implementation of the `Logger` interface, using a standard
-`log.Logger`.
+An interface for log output. `NewLogger` provides the canonical implementation.
 
 #### func  NewLogger
 
 ```go
-func NewLogger(out io.Writer) (me *ObLogger)
+func NewLogger(out io.Writer) Logger
 ```
-Creates and returns a new `*ObLogger`; `out` is optional and if `nil`, this
+Creates and returns a new `Logger`; `out` is optional and if `nil`, this
 disables logging.
-
-#### func (*ObLogger) Criticalf
-
-```go
-func (me *ObLogger) Criticalf(format string, args ...interface{})
-```
-Implements `Logger` interface.
-
-#### func (*ObLogger) Debugf
-
-```go
-func (me *ObLogger) Debugf(format string, args ...interface{})
-```
-Implements `Logger` interface.
-
-#### func (*ObLogger) Error
-
-```go
-func (me *ObLogger) Error(err error) error
-```
-Implements `Logger` interface.
-
-#### func (*ObLogger) Errorf
-
-```go
-func (me *ObLogger) Errorf(format string, args ...interface{})
-```
-Implements `Logger` interface.
-
-#### func (*ObLogger) Infof
-
-```go
-func (me *ObLogger) Infof(format string, args ...interface{})
-```
-Implements `Logger` interface.
-
-#### func (*ObLogger) Warningf
-
-```go
-func (me *ObLogger) Warningf(format string, args ...interface{})
-```
-Implements `Logger` interface.
 
 --
 **godocdown** http://github.com/robertkrimen/godocdown
