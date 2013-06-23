@@ -14,7 +14,6 @@ import (
 
 const (
 	//	The name of the environment variable storing the `Hive`-directory path, if set.
-	//	Used as a fall-back by `HiveRoot.GuessDir`.
 	ENV_OBHIVE = "OBHIVE"
 )
 
@@ -60,7 +59,7 @@ func guessHiveRootDir(userSpecified string) (guess string) {
 	return
 }
 
-//	Called by `func main` in `cmd/ob-server/main.go` package.
+//	Called by `func main` in `openbase/ob-core/cmd/ob-server`.
 //
 //	(Do note, this function does all initializations, defers all clean-ups and then runs 'forever'.)
 func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err error) {

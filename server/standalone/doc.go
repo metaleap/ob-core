@@ -1,2 +1,2 @@
-// Used by cmd/ob-server/main.go
+// Used by `openbase/ob-core/cmd/ob-server`
 package obsrv_daemon

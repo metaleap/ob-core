@@ -20,11 +20,11 @@ func reloadBundleCfg(bundle *ob.Bundle) {
 	cfg.SubRelTemplateDirPath = filepath.Join("pkg", bundle.NameFull, "template")
 }
 
-//	Represents the Bundle.Cfg of a Bundle of Kind "webuiskin"
+//	Represents the `Bundle.Cfg` of a `Bundle` of `Kind` `webuiskin`.
 type BundleCfg struct {
-	//	A HiveSub-relative directory path for the template files of this webuiskin.
-	//	For example, for a BundleCfg with Name "fluid", this would be:
-	//	pkg/webuiskin-fluid/template
+	//	A `HiveSub`-relative directory path for the template files of this `webuiskin`.
+	//	For example, for a `BundleCfg` with `Name` "fluid", this would be:
+	//	`pkg/webuiskin-fluid/template`
 	SubRelTemplateDirPath string
 
 	bundle *ob.Bundle

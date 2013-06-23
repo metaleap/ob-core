@@ -196,7 +196,7 @@ Initializes and returns a new `*Ctx` providing access to the specified
 - `hiveDir`: the `Hive`-directory path accessed by `me`.
 
 - `server` and `sandboxed` should be `false`, unless the caller is from
-`ob-core/server/standalone` or `ob-gae`.
+`openbase/ob-core/server/standalone` or `openbase/ob-gae`.
 
 - If `logger` is `nil`, `me.Log` is set to a no-op dummy and logging is
 disabled. In any event, `Init` doesn't log the `err` being returned (if any), so

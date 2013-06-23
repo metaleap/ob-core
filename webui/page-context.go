@@ -1,7 +1,5 @@
 package obwebui
 
-//	WebUi.Libs[..].CssUrl
-
 import (
 	ob "github.com/openbase/ob-core"
 	obpkg_webuilib "github.com/openbase/ob-core/bundle/webuilib"

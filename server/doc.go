@@ -1,2 +1,2 @@
-// Web server functionality, used by the cmd/ob-server main package
+// Web server functionality, used by `openbase/ob-gae` and `openbase/ob-core/server/standalone.
 package obsrv

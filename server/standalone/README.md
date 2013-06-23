@@ -2,14 +2,13 @@
 --
     import "github.com/openbase/ob-core/server/standalone"
 
-Used by cmd/ob-server/main.go
+Used by `openbase/ob-core/cmd/ob-server`
 
 ## Usage
 
 ```go
 const (
 	//	The name of the environment variable storing the `Hive`-directory path, if set.
-	//	Used as a fall-back by `HiveRoot.GuessDir`.
 	ENV_OBHIVE = "OBHIVE"
 )
 ```
@@ -26,7 +25,7 @@ Provided just in case you need to customize the `WriteTimeout`,
 ```go
 func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err error)
 ```
-Called by `func main` in `cmd/ob-server/main.go` package.
+Called by `func main` in `openbase/ob-core/cmd/ob-server`.
 
 (Do note, this function does all initializations, defers all clean-ups and then
 runs 'forever'.)
