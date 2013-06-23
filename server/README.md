@@ -3,7 +3,7 @@
     import "github.com/openbase/ob-core/server"
 
 Web server functionality, used by `openbase/ob-gae` and
-`openbase/ob-core/server/standalone.
+`openbase/ob-core/server/standalone`.
 
 ## Usage
 
