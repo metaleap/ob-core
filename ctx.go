@@ -62,7 +62,7 @@ func (me *Ctx) Bundles() *BundleRegistry {
 
 func (me *Ctx) ensureBundles() {
 	defer me.bundles.mutex.UnlockIf(me.bundles.mutex.Lock())
-	if me.bundles.ctx != me {
+	if me.bundles.Ctx != me { // fancier `if me.bundles.Ctx == nil`
 		me.bundles.init(me)
 	}
 }

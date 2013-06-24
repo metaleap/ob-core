@@ -34,6 +34,7 @@ Returns whether the specified `dirPath` points to a valid `Hive`-directory.
 
 ```go
 type Bundle struct {
+	Ctx *Ctx
 
 	//	The kind of this `Bundle`, according to its directory name,
 	//	for example `webuilib`.
@@ -91,12 +92,6 @@ type Bundle struct {
 Represents a bundle package found in a
 `{hive}/{sub}/pkg/{kind-name}/{name.kind.ob-pkg}` file.
 
-#### func (*Bundle) Ctx
-
-```go
-func (me *Bundle) Ctx() *Ctx
-```
-
 #### type BundleCfg
 
 ```go
@@ -118,6 +113,7 @@ Used by `Bundle.Kind`-specific `import`s to register their reload handlers with
 
 ```go
 type BundleRegistry struct {
+	Ctx *Ctx
 }
 ```
 

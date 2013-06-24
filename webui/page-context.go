@@ -6,7 +6,7 @@ import (
 	obpkg_webuiskin "github.com/openbase/ob-core/bundle/webuiskin"
 )
 
-type PageContextWebUi struct {
+type WebUi struct {
 	Libs         []*obpkg_webuilib.BundleCfg
 	SkinTemplate *PageTemplate
 }
@@ -14,7 +14,7 @@ type PageContextWebUi struct {
 type PageContext struct {
 	ctx *ob.Ctx
 
-	WebUi PageContextWebUi
+	WebUi WebUi
 }
 
 func NewPageContext(ctx *ob.Ctx) (me *PageContext) {

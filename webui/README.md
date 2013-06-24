@@ -10,7 +10,7 @@ Server-side web UI
 
 ```go
 type PageContext struct {
-	WebUi PageContextWebUi
+	WebUi WebUi
 }
 ```
 
@@ -21,21 +21,23 @@ type PageContext struct {
 func NewPageContext(ctx *ob.Ctx) (me *PageContext)
 ```
 
-#### type PageContextWebUi
-
-```go
-type PageContextWebUi struct {
-	Libs         []*obpkg_webuilib.BundleCfg
-	SkinTemplate *PageTemplate
-}
-```
-
-
 #### type PageTemplate
 
 ```go
 type PageTemplate struct {
+	ugo.MutexIf
+	*ob.Ctx
 	*template.Template
+}
+```
+
+
+#### type WebUi
+
+```go
+type WebUi struct {
+	Libs         []*obpkg_webuilib.BundleCfg
+	SkinTemplate *PageTemplate
 }
 ```
 

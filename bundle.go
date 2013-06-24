@@ -8,8 +8,7 @@ import (
 
 //	Represents a bundle package found in a `{hive}/{sub}/pkg/{kind-name}/{name.kind.ob-pkg}` file.
 type Bundle struct {
-	ctx *Ctx
-	reg *BundleRegistry
+	Ctx *Ctx
 
 	//	The kind of this `Bundle`, according to its directory name,
 	//	for example `webuilib`.
@@ -29,8 +28,7 @@ type Bundle struct {
 		BadDeps []string
 
 		//	The `error` that occurred when loading the `.ob-pkg` file, if any.
-		//	Outside of (arguably unlikely) file-system I/O issues,
-		//	this is most likely a TOML syntax error in the file.
+		//	Could be e.g. a file-system I/O issue or a TOML syntax error.
 		LoadErr error
 	}
 
@@ -49,10 +47,6 @@ type Bundle struct {
 		Require []string
 	}
 
-	//	Represents `CfgRaw` in a 'native'/'parsed'/'processed', bundle-specific way.
-	//	To be set by a `BundleCfgReloader` registered in `BundleCfgLoaders`.
-	Cfg interface{}
-
 	//	Unprocessed information loaded from the `.ob-pkg` bundle configuration file.
 	CfgRaw struct {
 		//	Information from the `[default]` section.
@@ -61,16 +55,16 @@ type Bundle struct {
 		//	Information from any other sections.
 		More map[string]BundleCfg
 	}
+
+	//	Represents `CfgRaw` in a 'native'/'parsed'/'processed', `Kind`-specific way.
+	//	To be set by a `BundleCfgReloader` registered in `BundleCfgLoaders`, if any.
+	Cfg interface{}
 }
 
 func newBundle(reg *BundleRegistry) (me *Bundle) {
-	me = &Bundle{reg: reg, ctx: reg.ctx}
+	me = &Bundle{Ctx: reg.Ctx}
 	me.CfgRaw.Default, me.CfgRaw.More = BundleCfg{}, map[string]BundleCfg{}
 	return
-}
-
-func (me *Bundle) Ctx() *Ctx {
-	return me.ctx
 }
 
 //	This may load from the primary dist .ob-pkg file, or just partial additions/overrides from cust.
@@ -83,7 +77,7 @@ func (me *Bundle) reload(kind, name, fullName, filePath string) {
 		return
 	}
 	if _, me.Diag.LoadErr = toml.DecodeFile(filePath, config); me.Diag.LoadErr != nil {
-		me.ctx.Log.Errorf("[BUNDLE] %s", me.Diag.LoadErr.Error())
+		me.Ctx.Log.Errorf("[BUNDLE] %s", me.Diag.LoadErr.Error())
 	} else {
 		var (
 			ok  bool

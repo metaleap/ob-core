@@ -11,56 +11,32 @@ import (
 
 //	Bundle package registry, accessed from `Ctx.Bundles`.
 type BundleRegistry struct {
-	ctx                *Ctx
-	initialBulkLoading bool
-	mutex              ugo.MutexIf
-	allBundles         map[string]*Bundle
-	cachedByKind       map[string]Bundles
-	watched            map[string]bool
+	Ctx *Ctx
+
+	initialLoad  bool
+	mutex        ugo.MutexIf
+	allBundles   map[string]*Bundle
+	cachedByKind map[string]Bundles
+	watched      map[string]bool
 }
 
 func (me *BundleRegistry) init(ctx *Ctx) {
-	me.ctx, me.cachedByKind, me.watched = ctx, map[string]Bundles{}, map[string]bool{}
+	me.Ctx, me.cachedByKind, me.watched = ctx, map[string]Bundles{}, map[string]bool{}
+}
+
+func (me *BundleRegistry) ensureLoaded() {
+	defer me.mutex.UnlockIf(me.mutex.Lock())
+	if loadNow := (me.allBundles == nil); loadNow {
+		me.allBundles = map[string]*Bundle{}
+		me.initialLoad = true
+		me.Ctx.Hive.Subs.WatchIn(me.reloadBundle, true, "pkg")
+		me.refreshCachesAndMeta()
+		me.initialLoad = false
+	}
 }
 
 func (me *BundleRegistry) fileName(name, kind string) string {
 	return strf("%s.%s.ob-pkg", name, kind)
-}
-
-func (me *BundleRegistry) reloadBundle(bundleDirPath string) {
-	if !me.initialBulkLoading {
-		defer me.mutex.UnlockIf(me.mutex.Lock())
-	}
-	addsOrDels, dirName := false, filepath.Base(bundleDirPath)
-	for key, bundle := range me.allBundles {
-		if key != bundle.NameFull || !me.ctx.Hive.Subs.FileExists("pkg", bundle.NameFull, me.fileName(bundle.Name, bundle.Kind)) {
-			me.ctx.Log.Warningf("[BUNDLE] Removing '%s': bundle directory or file no longer exists or renamed", key)
-			addsOrDels = true
-			delete(me.allBundles, key)
-		}
-	}
-	if pos := strings.Index(dirName, "-"); pos > 0 && pos == strings.LastIndex(dirName, "-") {
-		if !me.watched[bundleDirPath] {
-			addsOrDels = true
-			me.watched[bundleDirPath] = true
-			me.ctx.Hive.Subs.WatchIn(func(dp string) { me.reloadBundle(filepath.Dir(dp)) }, false, "pkg", dirName)
-		}
-		kind, name := dirName[:pos], dirName[pos+1:]
-		if cfgFilePath := filepath.Join(bundleDirPath, me.fileName(name, kind)); ufs.FileExists(cfgFilePath) {
-			me.ctx.Log.Infof("[BUNDLE] Loading '%s' from '%s'", dirName, cfgFilePath)
-			bundle := me.allBundles[dirName]
-			if bundle == nil {
-				addsOrDels, bundle = true, newBundle(me)
-				me.allBundles[dirName] = bundle
-			}
-			bundle.reload(kind, name, dirName, cfgFilePath)
-		}
-	} else {
-		me.ctx.Log.Warningf("[BUNDLE] Skipping '%s': expected directory name format '{kind}-{name}'", bundleDirPath)
-	}
-	if addsOrDels && !me.initialBulkLoading {
-		me.refreshCachesAndMeta()
-	}
 }
 
 func (me *BundleRegistry) refreshCachesAndMeta() {
@@ -76,7 +52,7 @@ func (me *BundleRegistry) refreshCachesAndMeta() {
 				bundles = append(bundles, bundle)
 				for _, req := range bundle.Info.Require {
 					if me.allBundles[req] == nil {
-						me.ctx.Log.Errorf("[BUNDLE] Bad dependency: '%s' requires '%s', which was not found.", bundle.NameFull, req)
+						me.Ctx.Log.Errorf("[BUNDLE] Bad dependency: '%s' requires '%s', which was not found.", bundle.NameFull, req)
 						bundle.Diag.BadDeps = append(bundle.Diag.BadDeps, req)
 					}
 				}
@@ -87,14 +63,37 @@ func (me *BundleRegistry) refreshCachesAndMeta() {
 	}
 }
 
-func (me *BundleRegistry) ensureLoaded() {
-	defer me.mutex.UnlockIf(me.mutex.Lock())
-	if loadNow := (me.allBundles == nil); loadNow {
-		me.allBundles = map[string]*Bundle{}
-		me.initialBulkLoading = true
-		me.ctx.Hive.Subs.WatchIn(me.reloadBundle, true, "pkg")
+func (me *BundleRegistry) reloadBundle(bundleDirPath string) {
+	defer me.mutex.UnlockIf(me.mutex.LockIf(!me.initialLoad))
+	addsOrDels, dirName := false, filepath.Base(bundleDirPath)
+	for key, bundle := range me.allBundles {
+		if key != bundle.NameFull || !me.Ctx.Hive.Subs.FileExists("pkg", bundle.NameFull, me.fileName(bundle.Name, bundle.Kind)) {
+			me.Ctx.Log.Warningf("[BUNDLE] Removing '%s': bundle directory or file no longer exists or renamed", key)
+			addsOrDels = true
+			delete(me.allBundles, key)
+		}
+	}
+	if pos := strings.Index(dirName, "-"); pos > 0 && pos == strings.LastIndex(dirName, "-") {
+		if !me.watched[bundleDirPath] {
+			addsOrDels = true
+			me.watched[bundleDirPath] = true
+			me.Ctx.Hive.Subs.WatchIn(func(dp string) { me.reloadBundle(filepath.Dir(dp)) }, false, "pkg", dirName)
+		}
+		kind, name := dirName[:pos], dirName[pos+1:]
+		if cfgFilePath := filepath.Join(bundleDirPath, me.fileName(name, kind)); ufs.FileExists(cfgFilePath) {
+			me.Ctx.Log.Infof("[BUNDLE] Loading '%s' from '%s'", dirName, cfgFilePath)
+			bundle := me.allBundles[dirName]
+			if bundle == nil {
+				addsOrDels, bundle = true, newBundle(me)
+				me.allBundles[dirName] = bundle
+			}
+			bundle.reload(kind, name, dirName, cfgFilePath)
+		}
+	} else {
+		me.Ctx.Log.Warningf("[BUNDLE] Skipping '%s': expected directory name format '{kind}-{name}'", bundleDirPath)
+	}
+	if addsOrDels && !me.initialLoad {
 		me.refreshCachesAndMeta()
-		me.initialBulkLoading = false
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
 	webmux "github.com/gorilla/mux"
 
@@ -13,7 +14,7 @@ import (
 //	Must be initialized via `NewHttpHandler`.
 type HttpHandler struct {
 	http.Handler
-	ctx *ob.Ctx
+	*ob.Ctx
 
 	//	Custom event handlers
 	On struct {
@@ -33,7 +34,7 @@ type HttpHandler struct {
 //	Initializes a new `*HttpHandler` to host the specified `*ob.Ctx`.
 func NewHttpHandler(ctx *ob.Ctx) (router *HttpHandler) {
 	if ctx != nil {
-		router = &HttpHandler{ctx: ctx}
+		router = &HttpHandler{Ctx: ctx}
 		mux := webmux.NewRouter()
 		router.Handler = mux
 		mux.PathPrefix("/_dist/").Handler(http.StripPrefix("/_dist/", http.FileServer(http.Dir(ctx.Hive.Subs.Dist.Paths.ClientPub))))
@@ -48,19 +49,18 @@ func NewHttpHandler(ctx *ob.Ctx) (router *HttpHandler) {
 	return
 }
 
-//	Returns the `*ob.Ctx` hosted by `me`.
-func (me *HttpHandler) Ctx() *ob.Ctx {
-	return me.ctx
-}
-
 func (me *HttpHandler) serveRequest(w http.ResponseWriter, r *http.Request) {
-	rc := newRequestContext(me.ctx, w, r)
+	now := time.Now()
+	rc := newRequestContext(me.Ctx, w, r)
 	for _, on := range me.On.Request.PreServe {
 		on(rc)
 	}
 	rc.serveRequest()
 	for _, on := range me.On.Request.PostServe {
 		on(rc)
+	}
+	if false {
+		me.Ctx.Log.Infof("Request served in %v", time.Now().Sub(now))
 	}
 }
 

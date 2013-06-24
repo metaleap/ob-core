@@ -3,16 +3,16 @@ package obwebui
 import (
 	"html/template"
 	"path/filepath"
-	"sync"
 
 	"github.com/go-utils/ufs"
+	"github.com/go-utils/ugo"
 
 	ob "github.com/openbase/ob-core"
 )
 
 var (
 	pageTemplateCache struct {
-		sync.Mutex
+		ugo.MutexIf
 		m map[string]*PageTemplate
 	}
 )
@@ -23,24 +23,27 @@ func init() {
 
 func getPageTemplate(ctx *ob.Ctx, subRelDirPath string) *PageTemplate {
 	pageTemplateCache.Lock()
-	defer pageTemplateCache.Unlock()
 	pt, ok := pageTemplateCache.m[subRelDirPath]
 	if !ok {
 		pt = newPageTemplate(ctx, subRelDirPath)
-		pt.load()
 		pageTemplateCache.m[subRelDirPath] = pt
+	}
+	pageTemplateCache.Unlock()
+	if !ok {
+		pt.load()
 	}
 	return pt
 }
 
 type PageTemplate struct {
-	ctx *ob.Ctx
+	ugo.MutexIf
+	*ob.Ctx
 	*template.Template
 	subRelDirPath string
 }
 
 func newPageTemplate(ctx *ob.Ctx, subRelDirPath string) (me *PageTemplate) {
-	me = &PageTemplate{ctx: ctx, subRelDirPath: subRelDirPath}
+	me = &PageTemplate{Ctx: ctx, subRelDirPath: subRelDirPath}
 	return
 }
 
@@ -55,11 +58,11 @@ func (me *PageTemplate) load() {
 			return true
 		})
 		var err error
-		me.Template, err = template.ParseFiles(fileNames...)
-		if err != nil {
+		defer me.UnlockIf(me.Lock())
+		if me.Template, err = template.ParseFiles(fileNames...); err != nil {
 			me.Template, err = template.New(me.subRelDirPath).Parse(strf("ERROR loading template at '%s': %+v", dirPath, err))
 		}
 		return
 	}
-	me.ctx.Hive.Subs.WatchIn(loader, true, me.subRelDirPath)
+	me.Ctx.Hive.Subs.WatchIn(loader, true, me.subRelDirPath)
 }

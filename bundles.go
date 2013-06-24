@@ -7,7 +7,7 @@ import (
 //	Type used inside `Bundle.CfgRaw`.
 type BundleCfg map[string]interface{}
 
-//	Used by `Bundle.Kind`-specific `import`s to register their reload handlers with `BundleCfgReloaders`.
+//	Used by `Bundle.Kind`-specific `import`ed `package`s to register their reload handlers with `BundleCfgReloaders`.
 type BundleCfgReloader func(*Bundle)
 
 var (
