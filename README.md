@@ -54,8 +54,7 @@ type Bundle struct {
 		BadDeps []string
 
 		//	The `error` that occurred when loading the `.ob-pkg` file, if any.
-		//	Outside of (arguably unlikely) file-system I/O issues,
-		//	this is most likely a TOML syntax error in the file.
+		//	Could be e.g. a file-system I/O issue or a TOML syntax error.
 		LoadErr error
 	}
 
@@ -74,10 +73,6 @@ type Bundle struct {
 		Require []string
 	}
 
-	//	Represents `CfgRaw` in a 'native'/'parsed'/'processed', bundle-specific way.
-	//	To be set by a `BundleCfgReloader` registered in `BundleCfgLoaders`.
-	Cfg interface{}
-
 	//	Unprocessed information loaded from the `.ob-pkg` bundle configuration file.
 	CfgRaw struct {
 		//	Information from the `[default]` section.
@@ -86,6 +81,10 @@ type Bundle struct {
 		//	Information from any other sections.
 		More map[string]BundleCfg
 	}
+
+	//	Represents `CfgRaw` in a 'native'/'parsed'/'processed', `Kind`-specific way.
+	//	To be set by a `BundleCfgReloader` registered in `BundleCfgLoaders`, if any.
+	Cfg interface{}
 }
 ```
 
@@ -106,8 +105,8 @@ Type used inside `Bundle.CfgRaw`.
 type BundleCfgReloader func(*Bundle)
 ```
 
-Used by `Bundle.Kind`-specific `import`s to register their reload handlers with
-`BundleCfgReloaders`.
+Used by `Bundle.Kind`-specific `import`ed `package`s to register their reload
+handlers with `BundleCfgReloaders`.
 
 #### type BundleRegistry
 
@@ -184,15 +183,12 @@ Global access. ONLY valid when initialized via `NewCtx`.
 #### func  NewCtx
 
 ```go
-func NewCtx(hiveDir string, server, sandboxed bool, logger Logger) (me *Ctx, err error)
+func NewCtx(hiveDir string, logger Logger) (me *Ctx, err error)
 ```
 Initializes and returns a new `*Ctx` providing access to the specified
 `hiveDir`.
 
 - `hiveDir`: the `Hive`-directory path accessed by `me`.
-
-- `server` and `sandboxed` should be `false`, unless the caller is from
-`openbase/ob-core/server/standalone` or `openbase/ob-gae`.
 
 - If `logger` is `nil`, `me.Log` is set to a no-op dummy and logging is
 disabled. In any event, `NewCtx` doesn't log the `err` being returned (if any),

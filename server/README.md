@@ -12,6 +12,7 @@ Web server functionality, used by `openbase/ob-gae` and
 ```go
 type HttpHandler struct {
 	http.Handler
+	*ob.Ctx
 
 	//	Custom event handlers
 	On struct {
@@ -37,13 +38,6 @@ Must be initialized via `NewHttpHandler`.
 func NewHttpHandler(ctx *ob.Ctx) (router *HttpHandler)
 ```
 Initializes a new `*HttpHandler` to host the specified `*ob.Ctx`.
-
-#### func (*HttpHandler) Ctx
-
-```go
-func (me *HttpHandler) Ctx() *ob.Ctx
-```
-Returns the `*ob.Ctx` hosted by `me`.
 
 #### type RequestContext
 

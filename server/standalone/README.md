@@ -20,12 +20,23 @@ Provided just in case you need to customize the `WriteTimeout`,
 `MaxHeaderBytes`, `TLSConfig` or `TLSNextProto` options prior to calling
 `InitThenListenAndServe`.
 
+#### func  HiveDir
+
+```go
+func HiveDir(dirPath string) string
+```
+If `dirPath` indicates a valid `Hive`-directory path, returns its `filepath.Abs`
+equivalent; otherwise returns the `$OBHIVE` environment variable regardless of
+`Hive`-directory validity.
+
 #### func  InitThenListenAndServe
 
 ```go
 func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err error)
 ```
 Called by `func main` in `openbase/ob-core/cmd/ob-server`.
+
+Sanitizes the specified `hiveDir` via the `HiveDir` function.
 
 (Do note, this function does all initializations, defers all clean-ups and then
 runs 'forever'.)
@@ -43,7 +54,7 @@ type Opt struct {
 	//	Set to `true` to suppress any and all writes to `stdout`.
 	Silent bool
 
-	//	If not 0, schedules a single emulated (transport-less) `GET /` "warm-up request"
+	//	If not 0, schedules a single emulated (in-process, transport-less) `GET /` "warm-up request"
 	//	right from within this process, n `time.Duration` after HTTP-serving was initiated.
 	//	(To be useful at all, this should probably be between 50-100ms and 1s.)
 	WarmupRequestAfter time.Duration
