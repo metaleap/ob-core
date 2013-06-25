@@ -6,7 +6,9 @@ import (
 	ob "github.com/openbase/ob-core"
 )
 
+//	Server-side aware wrapper around `ob.Ctx`.
 type Ctx struct {
+	//	The underlying `Ctx` being wrapped.
 	ob.Ctx
 
 	pageTemplateCache struct {
@@ -15,6 +17,7 @@ type Ctx struct {
 	}
 }
 
+//	Only valid method to create and initialize a new `*Ctx`.
 func NewCtx(hiveDir string, logger ob.Logger) (me *Ctx, err error) {
 	me = &Ctx{}
 	if err = me.Ctx.Init(hiveDir, logger); err != nil {

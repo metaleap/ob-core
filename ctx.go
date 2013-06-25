@@ -16,7 +16,7 @@ type Ctx struct {
 	bundles BundleRegistry
 }
 
-//	Initializes and returns a new `*Ctx` providing access to the specified `hiveDir`.
+//	`Init`ializes and returns a new `*Ctx` providing access to the specified `hiveDir`.
 //
 //	- `hiveDir`: the `Hive`-directory path accessed by `me`.
 //
@@ -33,6 +33,7 @@ func NewCtx(hiveDir string, logger Logger) (me *Ctx, err error) {
 	return
 }
 
+//	Called by `NewCtx`. Don't call this unless you're an in-the-know wrapper like `openbase/ob-core/server.Ctx`.
 func (me *Ctx) Init(hiveDir string, logger Logger) (err error) {
 	if me.Log = logger; me.Log == nil {
 		me.Log = NewLogger(nil)

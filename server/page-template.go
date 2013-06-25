@@ -20,6 +20,7 @@ func (me *Ctx) getPageTemplate(subRelDirPath string) *PageTemplate {
 	return pt
 }
 
+//	Wraps a `html/template.Template` defined in a `webuiskin` `Kind` of `Bundle`.
 type PageTemplate struct {
 	mx            ugo.MutexIf
 	tmpl          *template.Template
@@ -31,7 +32,7 @@ func newPageTemplate(subRelDirPath string) (me *PageTemplate) {
 	return
 }
 
-func (me *PageTemplate) Execute(w io.Writer, rc *RequestContext) error {
+func (me *PageTemplate) exec(w io.Writer, rc *RequestContext) error {
 	me.mx.Lock()
 	tmpl := me.tmpl
 	me.mx.Unlock()

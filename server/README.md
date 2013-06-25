@@ -11,16 +11,19 @@ Web server functionality, used by `openbase/ob-gae` and
 
 ```go
 type Ctx struct {
+	//	The underlying `Ctx` being wrapped.
 	ob.Ctx
 }
 ```
 
+Server-side aware wrapper around `ob.Ctx`.
 
 #### func  NewCtx
 
 ```go
 func NewCtx(hiveDir string, logger ob.Logger) (me *Ctx, err error)
 ```
+Only valid method to create and initialize a new `*Ctx`.
 
 #### type HttpHandler
 
@@ -58,14 +61,19 @@ Initializes a new `*HttpHandler` to host the specified `*Ctx`.
 
 ```go
 type PageContext struct {
+	//	Server-side web UI-related stuff
 	WebUI struct {
-		Libs []*obpkg_webuilib.BundleCfg
+		//	The `webuiskin` `Kind` of `Bundle` used.
 		Skin *PageTemplate
+
+		//	The `Bundle`s of `Kind` `webuilib` required by `Skin`.
+		Libs []*obpkg_webuilib.BundleCfg
 	}
 }
 ```
 
-Created during server-side rendering of a `PageTemplate`.
+Created at `RequestContext.Page` during server-side rendering of a
+`PageTemplate`.
 
 #### type PageTemplate
 
@@ -74,12 +82,7 @@ type PageTemplate struct {
 }
 ```
 
-
-#### func (*PageTemplate) Execute
-
-```go
-func (me *PageTemplate) Execute(w io.Writer, rc *RequestContext) error
-```
+Wraps a `html/template.Template` defined in a `webuiskin` `Kind` of `Bundle`.
 
 #### type RequestContext
 
@@ -90,14 +93,11 @@ type RequestContext struct {
 	//	Context related to the current `Page`, if any.
 	Page *PageContext
 
-	//	The `http.ResponseWriter` for this `RequestContext`.
-	Out http.ResponseWriter
+	//	Defaults to `Ctx.Log`.
+	Log ob.Logger
 
 	//	The `http.Request` for this `RequestContext`.
 	Req *http.Request
-
-	//	Defaults to `ob.Log`.
-	Log ob.Logger
 }
 ```
 

@@ -5,11 +5,15 @@ import (
 	obpkg_webuiskin "github.com/openbase/ob-core/bundle/webuiskin"
 )
 
-//	Created during server-side rendering of a `PageTemplate`.
+//	Created at `RequestContext.Page` during server-side rendering of a `PageTemplate`.
 type PageContext struct {
+	//	Server-side web UI-related stuff
 	WebUI struct {
-		Libs []*obpkg_webuilib.BundleCfg
+		//	The `webuiskin` `Kind` of `Bundle` used.
 		Skin *PageTemplate
+
+		//	The `Bundle`s of `Kind` `webuilib` required by `Skin`.
+		Libs []*obpkg_webuilib.BundleCfg
 	}
 }
 
