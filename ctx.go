@@ -25,8 +25,16 @@ type Ctx struct {
 //
 //	Whenever `err` is `nil`, `me` is non-`nil` and vice versa.
 func NewCtx(hiveDir string, logger Logger) (me *Ctx, err error) {
-	me = &Ctx{Log: logger}
-	if me.Log == nil {
+	me = &Ctx{}
+	if err = me.Init(hiveDir, logger); err != nil {
+		me.Dispose()
+		me = nil
+	}
+	return
+}
+
+func (me *Ctx) Init(hiveDir string, logger Logger) (err error) {
+	if me.Log = logger; me.Log == nil {
 		me.Log = NewLogger(nil)
 	}
 	if !IsHive(hiveDir) {
@@ -34,10 +42,6 @@ func NewCtx(hiveDir string, logger Logger) (me *Ctx, err error) {
 	}
 	if err == nil {
 		err = me.Hive.init(hiveDir)
-	}
-	if err != nil {
-		me.Dispose()
-		me = nil
 	}
 	return
 }
@@ -49,7 +53,7 @@ func (me *Ctx) Bundles() *BundleRegistry {
 }
 
 func (me *Ctx) ensureBundles() {
-	defer me.bundles.mutex.UnlockIf(me.bundles.mutex.Lock())
+	defer me.bundles.mx.UnlockIf(me.bundles.mx.Lock())
 	if me.bundles.Ctx != me { // fancier `if me.bundles.Ctx == nil`
 		me.bundles.init(me)
 	}

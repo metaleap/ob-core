@@ -66,13 +66,13 @@ func HiveDir(dirPath string) string {
 //
 //	(Do note, this function does all initializations, defers all clean-ups and then runs 'forever'.)
 func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err error) {
-	var ctx *ob.Ctx
+	var ctx *obsrv.Ctx
 	//	pre-init
 	hiveDir = HiveDir(hiveDir)
 
 	//	init
 	logger := ob.NewLogger(ugo.Ifw(opt.Silent, nil, os.Stdout))
-	if ctx, err = ob.NewCtx(hiveDir, logger); err == nil {
+	if ctx, err = obsrv.NewCtx(hiveDir, logger); err == nil {
 		defer ctx.Dispose()
 		logger.Infof("INIT @ %s", ctx.Hive.Dir)
 
@@ -94,7 +94,7 @@ func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err e
 		https := len(opt.TLS.CertFile) > 0 && len(opt.TLS.KeyFile) > 0
 		logger.Infof("LIVE @ %s", unet.Addr(ugo.Ifs(https, "https", "http"), HttpServer.Addr))
 		if opt.WarmupRequestAfter > 0 {
-			go localWarmupRequest(ctx, opt.WarmupRequestAfter)
+			go localWarmup(ctx, opt.WarmupRequestAfter, 4)
 		}
 		if https {
 			err = HttpServer.ListenAndServeTLS(opt.TLS.CertFile, opt.TLS.KeyFile)
@@ -105,15 +105,21 @@ func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err e
 	return
 }
 
-func localWarmupRequest(ctx *ob.Ctx, after time.Duration) {
+func localWarmup(ctx *obsrv.Ctx, after time.Duration, num int) {
 	time.Sleep(after)
-	var w unet.ResponseBuffer
-	if r, err := http.NewRequest("GET", "/", nil); r != nil {
-		r.Header["User-Agent"] = []string{"LocalWarmup"}
-		now := time.Now()
-		HttpServer.Handler.ServeHTTP(&w, r)
-		ctx.Log.Infof("Warmup `GET /` took %v", time.Now().Sub(now))
-	} else {
-		ctx.Log.Error(err)
+	req := func() {
+		var w unet.ResponseBuffer
+		if r, err := http.NewRequest("GET", "/", nil); r != nil {
+			r.Header["User-Agent"] = []string{"LocalWarmup"}
+			now := time.Now()
+			HttpServer.Handler.ServeHTTP(&w, r)
+			ctx.Log.Infof("Warmup `GET /` took %v", time.Now().Sub(now))
+		} else {
+			ctx.Log.Error(err)
+		}
+	}
+	//	cheap way to allow for -race detection?
+	for i := 0; i < num; i++ {
+		go req()
 	}
 }

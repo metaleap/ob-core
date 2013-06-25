@@ -7,14 +7,12 @@ import (
 	"time"
 
 	webmux "github.com/gorilla/mux"
-
-	ob "github.com/openbase/ob-core"
 )
 
 //	Must be initialized via `NewHttpHandler`.
 type HttpHandler struct {
 	http.Handler
-	*ob.Ctx
+	*Ctx
 
 	//	Custom event handlers
 	On struct {
@@ -31,8 +29,8 @@ type HttpHandler struct {
 	}
 }
 
-//	Initializes a new `*HttpHandler` to host the specified `*ob.Ctx`.
-func NewHttpHandler(ctx *ob.Ctx) (router *HttpHandler) {
+//	Initializes a new `*HttpHandler` to host the specified `*Ctx`.
+func NewHttpHandler(ctx *Ctx) (router *HttpHandler) {
 	if ctx != nil {
 		router = &HttpHandler{Ctx: ctx}
 		mux := webmux.NewRouter()
@@ -65,11 +63,11 @@ func (me *HttpHandler) serveRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 type hiveSubsStaticHandler struct {
-	ctx              *ob.Ctx
+	ctx              *Ctx
 	distSrv, custSrv http.Handler
 }
 
-func newHiveSubsStaticHandler(ctx *ob.Ctx, distDir, custDir string) (me *hiveSubsStaticHandler) {
+func newHiveSubsStaticHandler(ctx *Ctx, distDir, custDir string) (me *hiveSubsStaticHandler) {
 	me = &hiveSubsStaticHandler{
 		ctx:     ctx,
 		distSrv: http.FileServer(http.Dir(distDir)),

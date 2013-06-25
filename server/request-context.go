@@ -7,7 +7,6 @@ import (
 	webctx "github.com/gorilla/context"
 
 	ob "github.com/openbase/ob-core"
-	obwebui "github.com/openbase/ob-core/webui"
 )
 
 //	A function that accepts a `*RequestContext`.
@@ -23,10 +22,10 @@ func (me *RequestContextHandlers) Add(handlers ...RequestContextHandler) {
 
 //	Provides context for a non-static web request.
 type RequestContext struct {
-	*ob.Ctx
+	Ctx *Ctx
 
 	//	Context related to the current `Page`, if any.
-	*obwebui.PageContext
+	Page *PageContext
 
 	//	The `http.ResponseWriter` for this `RequestContext`.
 	Out http.ResponseWriter
@@ -38,9 +37,9 @@ type RequestContext struct {
 	Log ob.Logger
 }
 
-func newRequestContext(ctx *ob.Ctx, httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
+func newRequestContext(ctx *Ctx, httpResponse http.ResponseWriter, httpRequest *http.Request) (me *RequestContext) {
 	me = &RequestContext{Ctx: ctx, Out: httpResponse, Req: httpRequest, Log: ctx.Log}
-	me.PageContext = obwebui.NewPageContext(ctx)
+	me.Page = newPageContext(ctx)
 	return
 }
 
@@ -51,7 +50,7 @@ func (me *RequestContext) Get(key interface{}) interface{} {
 
 func (me *RequestContext) serveRequest() {
 	var w bytes.Buffer
-	err := me.PageContext.WebUi.SkinTemplate.Execute(&w, me)
+	err := me.Page.WebUI.Skin.Execute(&w, me)
 	if err == nil {
 		me.Out.Write(w.Bytes())
 	} else {

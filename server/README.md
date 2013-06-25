@@ -7,12 +7,27 @@ Web server functionality, used by `openbase/ob-gae` and
 
 ## Usage
 
+#### type Ctx
+
+```go
+type Ctx struct {
+	ob.Ctx
+}
+```
+
+
+#### func  NewCtx
+
+```go
+func NewCtx(hiveDir string, logger ob.Logger) (me *Ctx, err error)
+```
+
 #### type HttpHandler
 
 ```go
 type HttpHandler struct {
 	http.Handler
-	*ob.Ctx
+	*Ctx
 
 	//	Custom event handlers
 	On struct {
@@ -35,18 +50,45 @@ Must be initialized via `NewHttpHandler`.
 #### func  NewHttpHandler
 
 ```go
-func NewHttpHandler(ctx *ob.Ctx) (router *HttpHandler)
+func NewHttpHandler(ctx *Ctx) (router *HttpHandler)
 ```
-Initializes a new `*HttpHandler` to host the specified `*ob.Ctx`.
+Initializes a new `*HttpHandler` to host the specified `*Ctx`.
+
+#### type PageContext
+
+```go
+type PageContext struct {
+	WebUI struct {
+		Libs []*obpkg_webuilib.BundleCfg
+		Skin *PageTemplate
+	}
+}
+```
+
+Created during server-side rendering of a `PageTemplate`.
+
+#### type PageTemplate
+
+```go
+type PageTemplate struct {
+}
+```
+
+
+#### func (*PageTemplate) Execute
+
+```go
+func (me *PageTemplate) Execute(w io.Writer, rc *RequestContext) error
+```
 
 #### type RequestContext
 
 ```go
 type RequestContext struct {
-	*ob.Ctx
+	Ctx *Ctx
 
 	//	Context related to the current `Page`, if any.
-	*obwebui.PageContext
+	Page *PageContext
 
 	//	The `http.ResponseWriter` for this `RequestContext`.
 	Out http.ResponseWriter

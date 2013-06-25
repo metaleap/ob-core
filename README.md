@@ -210,6 +210,12 @@ func (me *Ctx) Dispose() (err error)
 ```
 Clean-up when you're shutting down.
 
+#### func (*Ctx) Init
+
+```go
+func (me *Ctx) Init(hiveDir string, logger Logger) (err error)
+```
+
 #### type HiveRoot
 
 ```go
@@ -333,6 +339,21 @@ type HiveSubs struct {
 
 Only used for `Hive.Subs`.
 
+#### func (*HiveSubs) DirExists
+
+```go
+func (me *HiveSubs) DirExists(subRelPath ...string) bool
+```
+Returns whether `me.Dist` or `me.Cust` contains the specified directory.
+
+#### func (*HiveSubs) DirPath
+
+```go
+func (me *HiveSubs) DirPath(subRelPath ...string) (dirPath string)
+```
+Returns either `me.Cust.DirPath(subRelPath...)` or
+`me.Dist.DirPath(subRelPath...)`.
+
 #### func (*HiveSubs) FileExists
 
 ```go
@@ -347,6 +368,14 @@ func (me *HiveSubs) FilePath(subRelPath ...string) (filePath string)
 ```
 Returns either `me.Cust.FilePath(subRelPath...)` or
 `me.Dist.FilePath(subRelPath...)`.
+
+#### func (*HiveSubs) Path
+
+```go
+func (me *HiveSubs) Path(subRelPath ...string) (path string)
+```
+Returns either `me.Cust.FilePath` or `me.Cust.DirPath` or `me.Dist.Path` for the
+specified `subRelPath...`.
 
 #### func (*HiveSubs) WalkAllDirs
 

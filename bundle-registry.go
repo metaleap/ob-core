@@ -14,7 +14,7 @@ type BundleRegistry struct {
 	Ctx *Ctx
 
 	initialLoad  bool
-	mutex        ugo.MutexIf
+	mx           ugo.MutexIf
 	allBundles   map[string]*Bundle
 	cachedByKind map[string]Bundles
 	watched      map[string]bool
@@ -25,7 +25,7 @@ func (me *BundleRegistry) init(ctx *Ctx) {
 }
 
 func (me *BundleRegistry) ensureLoaded() {
-	defer me.mutex.UnlockIf(me.mutex.Lock())
+	defer me.mx.UnlockIf(me.mx.Lock())
 	if loadNow := (me.allBundles == nil); loadNow {
 		me.allBundles = map[string]*Bundle{}
 		me.initialLoad = true
@@ -64,7 +64,7 @@ func (me *BundleRegistry) refreshCachesAndMeta() {
 }
 
 func (me *BundleRegistry) reloadBundle(bundleDirPath string) {
-	defer me.mutex.UnlockIf(me.mutex.LockIf(!me.initialLoad))
+	defer me.mx.UnlockIf(me.mx.LockIf(!me.initialLoad))
 	addsOrDels, dirName := false, filepath.Base(bundleDirPath)
 	for key, bundle := range me.allBundles {
 		if key != bundle.NameFull || !me.Ctx.Hive.Subs.FileExists("pkg", bundle.NameFull, me.fileName(bundle.Name, bundle.Kind)) {

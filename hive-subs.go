@@ -21,15 +21,38 @@ func (me *HiveSubs) init(root *HiveRoot) {
 	me.Cust.init(root, "cust")
 }
 
+//	Returns whether `me.Dist` or `me.Cust` contains the specified directory.
+func (me *HiveSubs) DirExists(subRelPath ...string) bool {
+	return me.Dist.DirExists(subRelPath...) || me.Cust.DirExists(subRelPath...)
+}
+
 //	Returns whether `me.Dist` or `me.Cust` contains the specified file.
 func (me *HiveSubs) FileExists(subRelPath ...string) bool {
 	return me.Dist.FileExists(subRelPath...) || me.Cust.FileExists(subRelPath...)
+}
+
+//	Returns either `me.Cust.DirPath(subRelPath...)` or `me.Dist.DirPath(subRelPath...)`.
+func (me *HiveSubs) DirPath(subRelPath ...string) (dirPath string) {
+	if dirPath = me.Cust.DirPath(subRelPath...); len(dirPath) == 0 {
+		dirPath = me.Dist.DirPath(subRelPath...)
+	}
+	return
 }
 
 //	Returns either `me.Cust.FilePath(subRelPath...)` or `me.Dist.FilePath(subRelPath...)`.
 func (me *HiveSubs) FilePath(subRelPath ...string) (filePath string) {
 	if filePath = me.Cust.FilePath(subRelPath...); len(filePath) == 0 {
 		filePath = me.Dist.FilePath(subRelPath...)
+	}
+	return
+}
+
+//	Returns either `me.Cust.FilePath` or `me.Cust.DirPath` or `me.Dist.Path` for the specified `subRelPath...`.
+func (me *HiveSubs) Path(subRelPath ...string) (path string) {
+	if path = me.Cust.FilePath(subRelPath...); len(path) == 0 {
+		if path = me.Cust.DirPath(subRelPath...); len(path) == 0 {
+			path = me.Dist.Path(subRelPath...)
+		}
 	}
 	return
 }
