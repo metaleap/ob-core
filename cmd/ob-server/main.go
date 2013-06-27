@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU()) // yes, I insist!
+	runtime.GOMAXPROCS(runtime.NumCPU()) // yes, I insist -> 3x speed-up per request-processing..
 
 	//	command-line flags
 	dirPath := flag.String("hive", "", fmt.Sprintf("%s hive directory path to use.\nIf omitted, defaults to either current directory, or the path stored in\nthe $%s environment variable: '%s'.\n", ob.OB_TITLE, obsrv_daemon.ENV_OBHIVE, os.Getenv(obsrv_daemon.ENV_OBHIVE)))

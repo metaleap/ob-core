@@ -42,12 +42,12 @@ func NewHttpHandler(ctx *Ctx) (router *HttpHandler) {
 		mux.Path("/{name}.{ext}").Handler(http.StripPrefix("/", dual))
 		dual = newHiveSubsStaticHandler(ctx, ctx.Hive.Subs.Dist.Paths.Pkg, ctx.Hive.Subs.Cust.Paths.Pkg)
 		mux.PathPrefix("/_pkg/").Handler(http.StripPrefix("/_pkg/", dual))
-		mux.PathPrefix("/").HandlerFunc(router.serveRequest)
+		mux.PathPrefix("/").HandlerFunc(router.servePageRequest)
 	}
 	return
 }
 
-func (me *HttpHandler) serveRequest(w http.ResponseWriter, r *http.Request) {
+func (me *HttpHandler) servePageRequest(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	rc := newRequestContext(me.Ctx, w, r)
 	for _, on := range me.On.Request.PreServe {
@@ -57,9 +57,7 @@ func (me *HttpHandler) serveRequest(w http.ResponseWriter, r *http.Request) {
 	for _, on := range me.On.Request.PostServe {
 		on(rc)
 	}
-	if false {
-		me.Ctx.Log.Infof("Request served in %v", time.Now().Sub(now))
-	}
+	w.Write([]byte(strf("<!-- %v -->", time.Now().Sub(now))))
 }
 
 type hiveSubsStaticHandler struct {

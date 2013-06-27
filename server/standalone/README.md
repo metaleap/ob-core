@@ -16,9 +16,10 @@ const (
 ```go
 var HttpServer http.Server
 ```
-Provided just in case you need to customize the `WriteTimeout`,
-`MaxHeaderBytes`, `TLSConfig` or `TLSNextProto` options prior to calling
-`InitThenListenAndServe`.
+Provided just in case you need to customize the `http.Server` being used prior
+to calling `InitThenListenAndServe`.
+
+Its `ReadTimeout` is `init`ialized to `2 * time.Minute`.
 
 #### func  HiveDir
 
@@ -36,7 +37,8 @@ func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err e
 ```
 Called by `func main` in `openbase/ob-core/cmd/ob-server`.
 
-Sanitizes the specified `hiveDir` via the `HiveDir` function.
+Sanitizes the specified `hiveDir` via the `HiveDir` function. Overrides
+`HttpServer.Addr` and `HttpServer.Handler`.
 
 (Do note, this function does all initializations, defers all clean-ups and then
 runs 'forever'.)
@@ -45,7 +47,7 @@ runs 'forever'.)
 
 ```go
 type Opt struct {
-	//	TCP address as per `http.Server.Addr`.
+	//	TCP address for `HttpServer.Addr`.
 	HttpAddr string
 
 	//	Set to `true` to have `InitThenListenAndServe` write all log output to a new log file in `{hive}/logs/`.
