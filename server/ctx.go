@@ -11,6 +11,10 @@ type Ctx struct {
 	//	The underlying `Ctx` being wrapped.
 	ob.Ctx
 
+	Http struct {
+		Handler HttpHandler
+	}
+
 	pageTemplateCache struct {
 		mx ugo.MutexIf
 		m  map[string]*PageTemplate
@@ -31,4 +35,5 @@ func NewCtx(hiveDir string, logger ob.Logger) (me *Ctx, err error) {
 
 func (me *Ctx) init() {
 	me.pageTemplateCache.m = map[string]*PageTemplate{}
+	me.Http.Handler.initRouter(me)
 }

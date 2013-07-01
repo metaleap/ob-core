@@ -5,15 +5,16 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"runtime"
 	"time"
+
+	"github.com/go-utils/ugo"
 
 	ob "github.com/openbase/ob-core"
 	obsrv_daemon "github.com/openbase/ob-core/server/standalone"
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU()) // yes, I insist -> 3x speed-up per request-processing..
+	ugo.MaxProcs() // yes, I insist -> 3x speed-up per request-processing..
 
 	//	command-line flags
 	dirPath := flag.String("hive", "", fmt.Sprintf("%s hive directory path to use.\nIf omitted, defaults to either current directory, or the path stored in\nthe $%s environment variable: '%s'.\n", ob.OB_TITLE, obsrv_daemon.ENV_OBHIVE, os.Getenv(obsrv_daemon.ENV_OBHIVE)))

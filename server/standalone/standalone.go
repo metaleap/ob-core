@@ -96,7 +96,7 @@ func InitThenListenAndServe(hiveDir string, opt *Opt) (logFilePath string, err e
 		}
 
 		//	all systems go!
-		HttpServer.Handler, HttpServer.Addr = obsrv.NewHttpHandler(ctx), opt.HttpAddr
+		HttpServer.Handler, HttpServer.Addr = &ctx.Http.Handler, opt.HttpAddr
 		https := len(opt.TLS.CertFile) > 0 && len(opt.TLS.KeyFile) > 0
 		logger.Infof("LIVE @ %s", unet.Addr(ugo.Ifs(https, "https", "http"), HttpServer.Addr))
 		if opt.WarmupRequestAfter > 0 {

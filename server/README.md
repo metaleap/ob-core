@@ -13,6 +13,10 @@ Web server functionality, used by `openbase/ob-gae` and
 type Ctx struct {
 	//	The underlying `Ctx` being wrapped.
 	ob.Ctx
+
+	Http struct {
+		Handler HttpHandler
+	}
 }
 ```
 
@@ -30,7 +34,6 @@ Only valid method to create and initialize a new `*Ctx`.
 ```go
 type HttpHandler struct {
 	http.Handler
-	*Ctx
 
 	//	Custom event handlers
 	On struct {
@@ -48,14 +51,7 @@ type HttpHandler struct {
 }
 ```
 
-Must be initialized via `NewHttpHandler`.
-
-#### func  NewHttpHandler
-
-```go
-func NewHttpHandler(ctx *Ctx) (router *HttpHandler)
-```
-Initializes a new `*HttpHandler` to host the specified `*Ctx`.
+Used only for Ctx.Http.Handler
 
 #### type PageContext
 
