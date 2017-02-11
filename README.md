@@ -1,7 +1,5 @@
 # obcore
 --
-    import "github.com/openbase/ob-core"
-
 Core ('kernel'-level, but server-less) functionality package
 
 ## Usage
@@ -447,6 +445,3 @@ func NewLogger(out io.Writer) Logger
 ```
 Creates and returns a new `Logger`; `out` is optional and if `nil`, this
 disables logging.
-
---
-**godocdown** http://github.com/robertkrimen/godocdown
